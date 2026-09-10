@@ -1,0 +1,71 @@
+\documentclass{scrartcl}
+\input{preamble}
+\setlength{\parindent}{0cm}
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\lhead{Lecture notes SS26}
+\rhead{JSK, Augsburg University}
+\setcounter{section}{0}
+\usepackage{comment}
+\usepackage{schemata}
+\excludecomment{forme}
+
+\begin{document}
+    
+\thispagestyle{empty}
+\begin{tikzpicture}[remember picture,overlay]
+   \node[anchor=north east,inner sep=20pt] at (current page.north east)
+              {\includegraphics[height=3cm]{logo-fai.png}};
+\end{tikzpicture}
+
+\begin{tikzpicture}[remember picture,overlay]
+   \node[anchor=north west,inner sep=10pt, align=left] at (current page.north west)
+              {\includegraphics[height=3cm]{UniA_Logo_RGB_InstInformatik_DE.png}};
+\end{tikzpicture}
+
+\begin{tikzpicture}[remember picture,overlay]
+   \node[anchor=north,inner sep=120pt, align=center] at (current page.north)
+              {
+                \Large
+                \textbf{Quantum Algorithms (SS 26)}\\
+                \phantom{x}\\
+                \large J.S. Kottmann\\
+                \normalsize with contributions from A. Bärligea \& O. Hüttenhofer
+                
+              };
+\end{tikzpicture}
+\vspace{2cm}
+\hrule
+
+\tableofcontents
+\clearpage
+\input{src/chapter1}
+%\clearpage
+% \input{src/hsp} --> Move to advanced lecture
+\clearpage
+\input{src/circuits}
+\clearpage
+\input{src/paulis}
+\clearpage
+\input{src/qpe}
+\clearpage
+\input{src/qft}
+\clearpage
+\input{src/shor}
+\clearpage
+
+\input{src/complexity2}
+\clearpage
+\input{src/variational}
+
+\clearpage
+\addcontentsline{toc}{section}{Appendix}
+
+\appendix
+\section*{Appendix}
+\input{src/labraket}
+\clearpage
+\input{src/shortqm}
+
+\end{document}

@@ -1,0 +1,171 @@
+\section{Quantum Complexity Classes}
+
+Decision problems are classes of problems where a definitive yes/no answer is sought. We will here always assume that the problem is decidable without explicitly mentioning it. 
+Further, we will treat all decision problems $A$ as ``promise-problems'', that is we only consider instances $x$ such that $A(x) \in \left\{ \text{true},\text{false} \right\}$.~\footnote{Take \texttt{Deutsch-Jozsa} as an example: The general case is that we will have instances where $f$ is constant (so $A(x)=\text{true}$) and instances where $f$ is balanced (so $A(x)=\text{false}$). If the promise holds, all instances can be classified like this. If the promise is broken, we can have instances that are not constant, but also not balanced. In the \texttt{Deutsch-Josza} algorithm, this can then lead to non-zero amplitutes on the state $\ket{\mathbf{0}}$ and therefore lead to wrong answers. Also the average case analysis in the classical case will not hold anymore.} We further assume that all instances are encoded in bits. We will try to be not too formal with definitions in order to not blow the chapter out of proportion while also avoiding having too repeat to many (classical) basics.~\footnote{formally decision problems are often phrased more generally as languages $L$ over an alphabet, usually $L\subseteq \left\{0,1\right\}^*$. A string $x\in\left\{0,1\right\}^*$ is then either in the language ($x\in L$) or not ($x\notin L)$ -- this is a decision problem.
+A promise problem is more flexible, here we have: $x\in L$ or $x\notin L$ or $x$ is invalid and can be ignored. The promise is, that invalid inputs are never received. To connect to the standard languages: those are promise problems where the invalid inputs are the empty set. By shifting from decision problems on language recognition to promise problems ``little is lost and much is gained'', we will however not notice much as we won't dive too deep. A good starting point for further reading would be \href{https://arxiv.org/abs/0804.3401}{arxiv:0804.3401} }\\
+
+Two examples: The decision problem \texttt{PRIME} asks if a given number $n\in \mathbb
+N$ is a prime number. Here the specific $n$ would be an instance of the problem and $\texttt{PRIME}(n) \in \left\{\text{true},\text{false}\right\}$. The binary encoding of the instance is obvious in this example: $n=5$ would require $|n|=3$ bits and take the form $101$, in this case $\texttt{PRIME}(101)=\text{true}$. The decision problem \texttt{SAT} asks if a given Boolean formula $\varphi$ is satisfiable. Here the formula $\varphi$ (e.g. $\varphi(u,v) = u \vee v $ with Boolean variables $u,v$) is an instance of the problem and $\texttt{SAT}(\varphi) \in \left\{ \text{true}, \text{false}\right\}$ for each possible $\varphi$. There are various ways to encode the formulas $\varphi$ into bits, but we won't need it explicitly.\\
+
+We will often call the decision problem itself $A$ and the possible instances $x$. Sometimes it will be useful to emphasize the binary encoding of $x$ by writing $\mathbf{x}$ (where $x_1$, $x_2$, $\dots$, will denote the individual bits in the encoding).\\
+
+If you are wondering about the ``promise'' part, think back to the algorithms you have seen before. In \texttt{Deutsch-Jozsa} the promise is that $f$ is either constant or balanced (while a general $f$ on $N$ bits could be neither). 
+
+\subsection{Speedup on NP problems}
+Before we start with the quantum complexity classes, we take a look back at one of the central classical complexity classes -- $NP$. 
+This class has so-called complete Problems -- those are problems within the class to which \textit{all} other problems of the class can be reduced in polynomial time.
+This means: If you can solve an $NP$-complete problem in poly time, you can solve (by reduction) \textit{all} $NP$ problems in poly time. Polynomial-time algorithms usually exploit the structure of a problem~\footnote{take the $NP$-complete \texttt{Knapsack} problem. If you restrict it to instances that are matroids (now we have a lot of structure), it becomes efficiently solvable by the very simple canonical greedy algorithm}. For $NP$-complete problems to have structure to exploit algorithmically, it would however mean that this structure holds (by reduction) for all $NP$ problems. In a sense that would be a structural exploit of the class itself. It is widely believed, but not proven, that this can not be done -- i.e. the standard assumption $P\neq NP$. In the following, we will see, that we can use a quantum algorithm to speed-up $NP$-complete (and therefore all $NP$) problems, but not exponentially. \\
+
+We start by a lazy definition of the complexity class $NP$ (also to not repeat too much).
+\begin{def*}[$NP$]\phantom{...}\\
+A decision problem $A$ is in $NP$ if for each instance $x$ we can construct a Boolean function $f_x$ operating on $O(\text{poly}(|x|))$ bits, that can be evaluated in $O(\text{poly}(|x|))$ time and for which it holds
+\begin{align}
+    &A(x)=\text{true} \Rightarrow f_x \text{ is satisfiable} \\
+    &A(x)=\text{false} \Rightarrow f_x \text{ is not satisfiable} 
+\end{align}
+where $f_x$ is satisfiable if there is an input bitstring $\mathbf{y}$ for which $f_x(\mathbf{y})=1$.
+\end{def*}
+This is not the typical $NP$ definition~\footnote{Compared to the more common definitions: The construction of $f$ for a given decision problem is basically the reduction to a \texttt{SAT} problem. Since \texttt{SAT} is $NP$ complete, the construction $f$ is always possible for $NP$ problems in the usual way where certificates are used (see $QMA$ definition later, standard $NP$ definition is basically the same, just without the probabilities.} and we just defined it in terms of satisfiability problems to save ourselves some definitions that we would anyway not need for the rest of the course.\\ 
+Since by definition the Boolean function (we can call this a verifier) $f$ can always be constructed for all instances of our decicion problems of interest, we will now try to use this $f$ to construct a quantum algorithm.
+
+The first thing that comes to mind is the ``quantum algorithm'' where we apply $N$ Hadamard gates on $N$-qubits initialized in $\ket{\mathbf{0}}$ in order to get a linear combination over all possible combinations of bitstrings. If the formula is satisfiable, we have a guarantee, that our quantum state contains the sought witness. The problem is that the corresponding amplitude will be $\frac{1}{\sqrt{2^N}}$ for each bitstring, so if $M$ of the $2^N$ possible bitstrings satisfy $f$, then our chance to read-out one of them is still exponentially small (except if $M$ is exponentially large, but this would be one of the trivial cases). All in all, this is not better than taking random guesses.\\
+What a quantum algorithm has to do, is to boost the amplitudes of the witnesses, while at the same time decreasing the amplitudes of all bitstrings that do not satisfy the formula. We can start by building a quantum oracle (same as before) to encode the function $f$, since after all, this is all we have available.
+\begin{def*}[Grover oracle]\phantom{,,,}\\
+Given an Boolean function $f$ on $N$-bits, Grover's oracle is 
+\begin{align}
+    U_f\ket{\mathbf{k}} = (-1)^{f(\mathbf{k})}\ket{\mathbf{k}}.
+\end{align}
+\end{def*}
+This oracle is able to ``detect'' the sought bitstrings in the linear superpositions and ``mark'' them with a minus in the amplitude. Note at this point, that the marking alone doesn't help us.\\
+At this point, one might ask: isn't Grovers oracle the same as the oracle of \texttt{Deutsch}, \texttt{Deutsch-Jozsa} and $\texttt{Bernstein-Vazirani}$? The answer is yes, it is, the only difference is the assumption we make about the functions $f$ -- but this will only affect the analysis of the underlying algorithms. In the case of \texttt{Grover}'s algorithm, there is no assumption (so no promises) on structure in $f$ and the underlying question is ``is there an entry $\mathbf{k}$ for which $f(\mathbf{k})=1$'' -- in other words ``is $f$ satisfiable''.
+\begin{algo*}[\texttt{Grover}]\phantom{...}\\
+Given a number $n$ of iterations and the Boolean function $f$ that encodes the problem of interest, the Grover operation is
+\begin{align}
+    U_\text{G}=\left(\hd^{\otimes N}U_0 \hd^{\otimes N}\right) U_f.
+\end{align}
+Grover's algorithm is then, to apply this operation $n$ times in sequence
+\begin{align}
+    \ket{\Psi_n} = \left(U_\text{G}\right)^n \ket{+}^{\otimes N} 
+\end{align}
+with the initial state $\ket{+}^{\otimes N} = \hd^{\otimes N}\ket{\mathbf{0}}$, and finally read-out the $N$ qubits.
+\end{algo*}
+
+\paragraph*{Example on 2 qubits}
+The initial state is, in this case
+\begin{align}
+    \ket{+}^{\otimes 2} &= \left(\frac{1}{\sqrt{2}}\ket{0} + \frac{1}{\sqrt{2}}\ket{1}\right)^{\otimes 2} = \frac{1}{2}\left(\ket{00} + \ket{01} + \ket{10} + \ket{11}\right)\nonumber\\
+    &= \frac{1}{2}\left(\ket{\mathbf{0}} + \ket{\mathbf{1}} + \ket{\mathbf{2}} + \ket{\mathbf{3}}\right)
+\end{align}
+now assume that $f(\2) = 1$ and and otherwise $f(\kk)=0$.
+The chance to sample the correct solution out of the initial state is then $|1/2|^2=1/4$.
+If we apply the Grover oracle the initial state, we get a sign flip in the amplitude of $\ket{\mathbf{2}}$
+\begin{align}
+    U_f \ket{+}^{\otimes 2} = \frac{1}{2}\left(\ket{\0} + \ket{\1} - \ket{\2} + \ket{\3}\right).
+\end{align}
+Application of the full Grover operation then leads to
+\begin{align}
+    U_G \ket{+}^{\otimes 2} &= \hd^{\otimes 2} U_0 \hd^{\otimes 2} \frac{1}{2}\left(\ket{\mathbf{0}} + \ket{\mathbf{1}} - \ket{\mathbf{2}} + \ket{\mathbf{3}}\right) \nonumber \\
+    &= \hd^{\otimes 2} U_0  \frac{1}{2}\left(\ket{++} + \ket{+-} - \ket{-+} + \ket{--}\right) \nonumber \\
+    &= \hd^{\otimes 2} U_0  \frac{1}{2}\left(\ket{\mathbf{0}} - \ket{\mathbf{1}} + \ket{\mathbf{2}} + \ket{\mathbf{3}}\right) \nonumber \\
+    &= -\hd^{\otimes 2} \frac{1}{2}\left(\ket{\mathbf{0}} + \ket{\mathbf{1}} - \ket{\mathbf{2}} - \ket{\mathbf{3}}\right) \nonumber \\
+    &= -\ket{\mathbf{2}},
+\end{align}
+(note that you need to do some side calculation from second to third line)
+so we have ``boosted'' the probability of reading out the correct results $\ket{\mathbf{2}}$ from $1/4$ to $1$. On first glance that looks great since we get the correct answer to 100\%. But try the following examples as well
+\begin{itemize}
+    \item Same as before, just now we have $f(\2)=1$ and $f(\3)=1$, i.e. our initial state will have 50\% probability to get one of the two possible solutions. \texttt{Grover} algorithm with $n=1$ will then result in the state where the success probability is still 50\%. So plain \texttt{Grover} can not boost further, if you are already at 50\%. 
+    \item If you try the same with three qubits and $f(\mathbf{2})=f(010)$ you will find, that the probability of reading out $\mathbf{2}$ will be boosted from $1/8$ to around 78\% -- still great, but not 100\%
+\end{itemize}
+In general, one can show (see Bachelor lecture, or online resources) that in the worst case $n\approx \frac{\pi}{4}\sqrt{2^N} \in O(\sqrt{2^N})$ iterations of the Grover operation are necessary to get to a satisfying (success probability over $1/2$) result. 
+
+\paragraph*{Geometric picture} The key to analyze \texttt{Grover} lies in a geometric interpretation of the two main operations which turn out to be reflections. $U)f$ reflects around the sought target state, and the other part realizes as reflection around the initial state ($\ket{+}^{\otimes N}$). We will not go into the details here, as this is been the subject of other lectures already. If you are interested, ask in the tutorials for a quick recap.~\footnote{since May 2025 there is also this video that illustrates the concept in an excellent fashion~\href{https://www.youtube.com/watch?v=RQWpF2Gb-gU}{youtube/3blue1brown}} \\
+
+
+In the context of this chapter, the key takeaway from \texttt{Grover} is that it allows us to get a speedup over classical decision problems, but this speedup is ``only'' a square-root (so not exponential). The difference to \texttt{Deutsch-Jozsa} (where we could show an exponential speedup) is that we now did not assume \textit{any} structure in $f$. Meaning $f$ could just be any \texttt{SAT} instance and therefore \textit{any} instance of an $NP$ problem, since \texttt{SAT} is $NP$-complete, and all problems in $NP$ can be polynomial reduced to \texttt{SAT}.\\
+So, we can have a square-root speed-up over \textit{all} $NP$-problems~\footnote{if we compare to classical brute-force search} but we can (most-likely) not perform any better in the general case. If we want to go beyond square-roots, we need to have more structure in the problem. 
+
+\subsection{Preface: Why BQP and QMA}
+
+Since the notion of universality in the quantum circuit model is only approximative, there are operations that can be represented exactly with one universal gate set, but only approximated with another. Because of this, we want to avoid the formulation of quantum complexity classes that require 100\% accuracy. Of course we also want to avoid complexity classes that depend on the employed gate set. The standard quantum complexy classes are therefore closer to probabilistic complexity classes. 
+Here the class $BPP$ plays the role of $P$ and $MA$ plays the role of $NP$. The corresponding quantum complexity classes are $BQP$ and $QMA$, and often they are just introduced as the quantum versions of $P$ and $NP$.
+
+\subsection{BQP}
+
+\begin{def*}[$BPP$ - bounded-error probabilistic polynomial time]\phantom{...}\\
+    A decision problem $A$ is in $BPP$ if there is a probabilistic Turing machine $M$ with the properties
+    \begin{enumerate}
+        \item if $A(x)=\text{true}$ (yes-instance) then $M(x)$ will accept with probability $p \geq 2/3$
+        \item if $A(x)=\text{false}$ (no-instance) then $M(x)$ will accept with probability $p \leq 1/3$
+    \end{enumerate}
+    In other words: We have at last a 2/3 chance of correctly identifying a yes-instance, and at most a 1/3 change of wrongfully identifying a no-instance as a yes-instance.
+\end{def*}
+It is conjectured (common belief, but not proven) that $BPP = P$ (access to random numbers most likely doesn't really help you asymptotically).
+
+\begin{def*}[$BQP$ - bounded-error quantum polynomial]\phantom{...}\\
+    A decision problem $A$ is in $BQP$ if we have a quantum computer and a family of quantum circuits $U_N$
+    \begin{enumerate}
+        \item $U_N$ takes $N$ input qubits
+        \item The circuit has one designated qubit that is read out after the circuit is executed
+        \item $U_N$ can be generated in polynomial time 
+    \end{enumerate}
+    Let $x$ be an instance of the problem  $\mathbf{x}$ a bitstring ($N=|\mathbf{x}|)$ that encodes $x$ in binary
+    \begin{enumerate}
+        \item if $A(x)=\text{true}$ (yes-instance) then $\sum_{\mathbf{t}}|\bra{\mathbf{t}}U_N\ket{\mathbf{x}}|^2 \geq 2/3$ 
+        \item if $A(x)=\text{false}$ (no-instance) then $\sum_{\mathbf{t}}|\bra{\mathbf{t}}U_N\ket{\mathbf{x}}|^2\leq 1/3$
+    \end{enumerate}
+    Here $\mathbf{t}$ denotes all bitstrings where the designated output qubit is in $\ket{1}$. E.g. for $N=2$ we would have
+    $\mathbf{t}_1 \in \left\{\ket{01}, \ket{11}\right\}$ (the last qubit is always in $\ket{1}$). The computed quantity are the absolute square of the accumulated probability amplitudes -- i.e. the probability that the read-out qubit will be in $\ket{1}$. 
+\end{def*}
+
+
+\subsection{QMA}
+
+%\begin{def*}[NP]\phantom{...}\\
+% A decision problem $A$ is in $NP$ if there is a polynomial-time deterministic Turing machine (verifier) $M$ that takes instances $x$ of $A$ and an additional input $y$ with $|y|\in O(\text{poly}(|x|))$ and
+% \begin{enumerate}
+%     \item if $A(x)=\text{true}$ (yes-instance) there is an $y$ for which $M(x,y)$ accepts
+%     \item if $A(x)=\text{false}$ (no-instance) then $M(x,y)$ rejects for all possible $y$
+% \end{enumerate}
+% \end{def*}
+
+\begin{def*}[QMA -- Quantum Merlin Arthur]\phantom{...}\\
+A decision problem $A$ in $QMA$ if there is a family of circuits $U_N$ with a designated output qubit that take $N + \text{poly}(N)$ input qubits and can be generated in \text{poly}(N) time.
+
+\begin{enumerate}
+    \item if $A(x)=\text{true}$ then $\sum_{\mathbf{t}} |\bra{\mathbf{t}} U_N \left(\ket{\mathbf{x}}\otimes\ket{\Psi}\right) |^2 \geq 2/3$ for some $\ket{\Psi}$
+    \item if $A(x)=\text{false}$ then $\sum_{\mathbf{t}} |\bra{\mathbf{t}} U_N \left(\ket{\mathbf{x}}\otimes\ket{\Psi}\right) |^2 \leq 1/3$ for all possible $\ket{\Psi}$
+\end{enumerate}
+where $\mathbf{t}$ is defined in the same way as in BQP (all basis states where the output qubit is in $\ket{1})$.
+\end{def*}
+The name Quantum Merlin Arthur comes from the analogy that a powerful wizard (Merlin) can generate arbitrary quantum states (our quantum witnesses $\ket{\Psi}$) and send them to Arthur. The latter is not as powerful as the wizard, but at least he has access to a quantum computer (our quantum verifier) where he can try to use the state from Merlin as an input to help solve the decision problem of interest.~\footnote{that analogy would of course also work without the quantum part, where the wizzard just creates classical witnesses. The classical complexity class $MA$ (basically $NP$ with probabilistic Turing machines as verifiers) uses this analogy.}\\
+
+A question that immediately comes to mind is: why $QMA$ and not $QNP$? Meaning, why are we taking the detour over the probabilistic complexity classes $MA$ instead of directly modifying the $NP$ definition to a quantum version -- it should basically look the same as $QMA$ just with the $2/3$ and $1/3$ probabilities boosted to $1$ and $0$. This would of course work, but it would be an inconvenient class to work with. This inconvenience arises from the quantum circuit model. While it is true that we have various sets of universal gates that are able to represent any unitary operation we want, it is not necessarily true that we can compile those unitary operations \textit{exactly} to a polynomial sequence of gates from a given universal set. We can however approximate to arbitrary accuracy.\\
+Fortunately we still have the notion of $QMA$ completeness, which is also why $QMA$ is often just referred to as the ``quantum $NP$'' instead of the $quantum MA$ (which it literally is).
+
+% \subsection{QMA Completeness}
+% Similar to $NP$ we have complete problems in $QMA$. In the case of $NP$, Stephen Cook realized that a polynomial-time non-deterministic Turingmachine (NTM, the computational model for $NP$) can be reduced to an instance of \texttt{SAT} (the Boolean satisfyability problem) where the NTM and it's input are encoded into a Boolean formula that can only be satisfied if the NTM accepts.\\
+% In $QMA$ Merlin sends the quantum witness that allows Arthur to verify the solution to the decision problem for all yes instances. In $NP$ the witness is the input string $y$, and this is what the NTM can generate in polynomial time (same as Merlin can generate the correct quantum witness). We are now looking for a decision problem $A$ that is part of $QMA$ and powerful enough that all other problems can be reduced to it. The problem we are looking for is called \texttt{local-Hamiltonian} where the locality will ensure membership in $QMA$ and the Hamiltonian will correspond to a quantum observable~\footnote{see B.Sc lecture/or repetition in tutorials} that is general enough that we can encode all $QMA$ decision problems into it. 
+
+% We start with some definitions
+% \begin{def*}[Hamiltonian]
+% Actually Hamiltonians are the operators (observables) that describe the energy of a physical system. In the context here and wide parts of the literature it is however simply used as a fancy word for Hermitian matrix. For this course it suffices if the Hermitian matrix is acts on $N$-qubits (i.e. the dimension is $2^N \times 2^N$).
+% \end{def*}
+% \begin{def*}[$k$-local Hamiltonian]
+% A Hamiltonian $H$ on $N$-qubits is called $k$-local if it can be written as a linear combination of Hamiltonians $h_k$ that each individually only act non-trivially on at most $k$ qubits
+% \begin{align}
+%     H = \sum_{k} c_k h_k, \;\; c_k\in \mathbb{R}.
+% \end{align}
+% Examples with Pauli-matrices ($X$, $Y$, $Z$) that act on individual qubits
+% \begin{align*}
+%     H &= X\otimes Z & (\text{2-local})\\
+%     H &= X\otimes Z + \frac{1}{2} X\otimes 1 \otimes Y & (\text{2-local})\\
+%     H &= X\otimes X \otimes X + Y\otimes 1\otimes 1 & (\text{3-local})\\
+%     H &= X(1)Y(8)Z(9) + X(2)Y(3)Z(4) + X(1) & (\text{3-local})
+% \end{align*}
+
+% The decision problem of interest is now connected to the eigenvalues of the Hamiltonian (remember, that those are the observable quantities
+
+
+    
+% \end{def*}
+

@@ -1,0 +1,352 @@
+\section{The Hidden Subgroup Problem}
+
+\subsection{Simon's Problem}
+Simon's problem is on first glance similar to the problem of Bernstein and Vazirani. Again, we are dealing with an oracle in the form of a function on $N$ bits and a hidden $N$-bitstring $\mathbf{y}$. 
+The first difference: the function $f$ is not mapping to a single bit, but can map to many
+\begin{align}
+    f: \left\{0,1\right\}^N \rightarrow \left\{0,1\right\}^M,\;\; M\leq N
+\end{align}
+The oracle $f$ promises
+\begin{align}
+    \forall \mathbf{x} \neq \mathbf{x}': f(\mathbf{x}) = f(\mathbf{x}') \Leftrightarrow \mathbf{x}' = \mathbf{x} \oplus \mathbf{y}
+\end{align}
+and the task is to find the \textit{hidden} bitstring $\mathbf{y}$.\\
+
+A classical algorithm to the problem would be
+\begin{enumerate}
+    \item Select a pair $\mathbf{x},\mathbf{x'}$ (at random).
+    \item evaluate $f(\mathbf{x})=f(\mathbf{x')}$, if true keep the pair.
+    \item repeat until $M$ pairs are found.
+    \item The $M$ pairs $\left(\mathbf{x}_k,\mathbf{x}'_k\right)$ provide enough information to solve the linear system $\mathbf{x}_k = \mathbf{x}'_k \oplus \mathbf{y}$ and determine $\mathbf{y}$.
+\end{enumerate}
+The problem with efficiency is, that, in the worst-case, we need to sample an exponential amount of pairs (leading to exponentially many queries to $f$). The quantum version allows us to find $M$ pairs with a linear amount of queries. An average case analysis improves things classically, but remains exponential, we will not bother with this here.\\
+
+\begin{def*}[Simon's Problem]
+We are given a function $f:\left\{0,1\right\}^N \rightarrow \left\{0,1\right\}^M$ with
+$$ f(\mathbf{x}) = f(\mathbf{z}) \Leftrightarrow \mathbf{x} \oplus \mathbf{y} = \mathbf{z}$$
+for all $\mathbf{x}\neq \mathbf{z}$ and unique hidden $N$-bitstring $\mathbf{y}\in\left\{0,1\right\}^N$ that has to be found.
+\end{def*}
+
+We can already recover a special case: If $\mathbf{y}=\mathbf{0}$ then $\mathbf{x} = \mathbf{x}' \oplus \mathbf{y}$ holds true for \textit{all} pairs $(\mathbf{x}, \mathbf{x}')$, therefore $f(\mathbf{x})=f(\mathbf{x}')$ has to hold for all pairs as well making $f$ constant.~\footnote{Note however, that we can not simply run \texttt{Deutsch-Josza} to identify this case, since after a single run that results in a positive answer, we can not be sure, if the probability was 100\%. The Algorithm needs to be adapted a little, and we will require multiple queries to it, in order to recover $\mathbf{y}$.}
+On the other hand, if the hidden string is not the zero-string, $\mathbf{y}\neq 0$, then the function needs to have $2^N/2$ distinct values: one for each pair $\mathbf{x}, \mathbf{x}\oplus \mathbf{y}$.~\footnote{proof: for $\mathbf{a} \neq \mathbf{b} \oplus \mathbf{y}$ assume $f(\mathbf{a})=f(\mathbf{b})$ then it follows from the promised structure $\mathbf{a} = \mathbf{b} \oplus \mathbf
+y$ which is a contradiction. At the same time, if we have $\mathbf{a} = \mathbf{a}' \oplus \mathbf{y}$ we can not have a second $\mathbf{a} = \mathbf{a}'' \oplus \mathbf{y}$ because  $\mathbf{a}  = \mathbf{a}' \oplus \mathbf{y}= \mathbf{a}'' \oplus \mathbf{y} \Rightarrow \mathbf{a}'=\mathbf{a}''$ }\\
+We can summarize the promised properties of the function $f$ as
+\begin{align}
+&f(\mathbf{x}) = f(\mathbf{x} \oplus \mathbf{y})\\
+&\mathbf{y}\neq\mathbf{0} \Rightarrow f(\mathbf{x}) \neq f(\mathbf{z})\; \; \forall \mathbf{z} \notin \left\{\mathbf{x}, \mathbf{x}\oplus \mathbf{y}\right\}\\
+&\mathbf{y}=\mathbf{0} \Rightarrow f=\text{const}
+\end{align}
+
+
+The algorithm works with two registers, one carrying the input of $f$ and one the output. We assume that the operation $f$ is available as unitary operation $U_f$ acting on these registers as
+\begin{align}
+    U_f \left(\ket{\mathbf{x}}\otimes \ket{\mathbf{0}}\right) = \ket{\mathbf{x}}\otimes \ket{ f(\mathbf{x})}.
+\end{align}
+The full algorithm is
+\begin{algo*}[\texttt{Simon}{'s Algorithm}]
+Execute the circuit
+\begin{center}
+$ U_\text{S}$ = \begin{quantikz}
+& \gate{\hd^{\otimes N}} & \gate[2]{U_f}& \gate{\hd^{\otimes N}} & \qw \\
+& \qw  &[1cm] & \qw & \qw\\
+\end{quantikz}
+\end{center}
+and keep the results on the first register. Repeat $O(N)$ times until enough bitstrings $\mathbf{k}$ are sampled to solve the linear system $\mathbf{y}\odot \mathbf{k}=0$.
+\end{algo*}
+We begin (at this point, almost traditionally) with a sequence of Hadamard gates on each qubit in the first register followed by the oracle $U_f$ acting on both
+\begin{align}
+    \ket{\mathbf{0}}\otimes \ket{\mathbf{0}} \xrightarrow[]{\hd^{\otimes N}} \ket{+}^{\otimes N} \otimes \ket{\mathbf{0}} = \frac{1}{\sqrt{2^N}}\left(\sum_{k=0}^{2^N-1}\ket{\mathbf{k}}\right) \otimes \ket{\mathbf{0}} \xrightarrow[]{U_f} \frac{1}{\sqrt{2^N}} \sum_{k=0}^{2^N-1} \left(\vphantom{\sum_{\suum}}\ket{\mathbf{k}}\otimes \ket{{f(\mathbf{k})}}\right).\nonumber
+\end{align}
+After the state is prepared, we read out the second qubit register -- that is, we will get one of the possible values of $f(\mathbf{k})$, let's call them $a = f(\mathbf{i})$, with $\mathbf{i}\in \left\{\mathbf{k}\right\}_{k=0}^{2^N-1}$ and probability of $1/2^N$ for each of them. As a result the remaining qubit register collapses to a linear combination of $\mathbf{i}$ and the partner $\mathbf{i}\oplus \mathbf{y}$ that lead to $f(\mathbf{i})=a$
+\begin{align}
+    \frac{1}{\sqrt{2}} \left( \ket{\mathbf{i}} + \ket{\mathbf{i\oplus y}}\right),
+\end{align}
+At this point we do not profit yet, from reading out the first register, we first need to transform again with a Hadamard operation on all qubits on the remaining register
+\begin{align}
+        \frac{1}{\sqrt{2}} \left( \ket{\mathbf{i}} + \ket{\mathbf{i \oplus y}}\right) \xrightarrow[]{\hd^{\otimes N}}& \frac{1}{\sqrt{2}}\left( \left(\frac{1}{\sqrt{2^N}}\sum_{k=0}^{2^N-1} (-1)^{\mathbf{k}\odot \mathbf{i}}\ket{\mathbf{k}}\right) +\left(\frac{1}{\sqrt{2^N}}\sum_{k=0}^{2^N-1} (-1)^{\mathbf{k}\odot( \mathbf{i}\oplus\mathbf{y})}\ket{\mathbf{k}}\right) \right)\nonumber\\
+        &= \frac{1}{\sqrt{2^{N+1}}}\sum_{k=0}^{2^N-1} (-1)^{\mathbf{k\odot i}} \left(1+(-1)^{\mathbf{k}\oplus \mathbf{y}}\right) \ket{\mathbf{k}} \nonumber\\
+        & = \frac{1}{\sqrt{|A|}} \sum_{k\in A^\perp} (-1)^{\mathbf{k\odot i}} \ket{\mathbf{k}}, \quad A^\perp = \left\{\mathbf{k} \;|\; \mathbf{k} \odot \mathbf{y} = 0\right\}.
+\end{align}
+This is where the magic happened. If we are now reading out the register, we will get a $\mathbf{k}$ such that $\mathbf{k\odot \mathbf{y}}=0$ (with uniform probability over all such candidates). This is completely independent from what value $a=f(\mathbf{i})$ we have read out before. To determine the $M$-bitstring $\mathbf{y}$ via the linear system $\mathbf{k\odot \mathbf{y}}=0$ it suffices to get $M$ candidates $\mathbf{k}$. So we need to repeat the algorithm $O(M)$ times to solve the problem. While doing this, we can also detect the special case $f=const$ with high probability (we would read out the same value in the first register on every trial and the second register would always give back $\mathbf{0}$).
+To digest this information, it is beneficial to look at a concrete example.
+
+\paragraph{Example: $N=2,M=1,\; f(\mathbf{x})=x_1\oplus x_2$}: In this example our function acts on two qubits with the concrete assignments $00\rightarrow 0, 01\rightarrow 1, 10 \rightarrow 1, 11 \rightarrow0$. So we have $f(\mathbf{0})=f(\mathbf{3})$ and $f(\mathbf{1})=f(\mathbf{2})$ and the hidden string is $\mathbf{y}=\mathbf{3}=11$. From all possible 4 combination of two bits, two (00 and 11) fulfill the equation $\mathbf{y} \odot \mathbf{k} = y_1k_1 \oplus y_2k_2 = k_1 \oplus k_2=0$. The quantum circuit prepares the states
+\begin{align}
+    \ket{0}^{\otimes}\otimes \ket{0} \xrightarrow[]{\hd^{\otimes N}}& \frac{1}{2}\left(\ket{00} + \ket{01} + \ket{10} + \ket{11}\right)\otimes \ket{0}\\
+    \xrightarrow[]{U_f}& \frac{1}{2} \left(\ket{00}\otimes\ket{0} + \ket{01}\otimes\ket{1} + \ket{10}\otimes \ket{1} + \ket{11}\otimes \ket{0}\right)\nonumber\\
+    \xrightarrow[]{\hd^{\otimes N}}& \frac{1}{2} \left(\ket{++}\otimes\ket{0} + \ket{+-}\otimes\ket{1} + \ket{-+}\otimes \ket{1} + \ket{--}\otimes \ket{0}\right)\nonumber\\
+    &= \frac{1}{\sqrt{2}}\left(\left(\ket{00} + \ket{11}\right)\otimes\ket{0} + \left(\ket{00} + \ket{11}\right)\otimes\ket{1}\right)\nonumber\\
+    & =\frac{1}{\sqrt{2}}\left(\ket{00} + \ket{11}\right)\otimes\ket{+}.
+\end{align}
+So by reading out the first two qubits we either get $00$ or $11$, the two candidates we need to determine $\mathbf{y}$ via the linear system $\mathbf{y}\odot \mathbf{k}=0$. Note again that the end result is independent of the third qubit.
+At this point we also realize, that reading out the second register (that holds the value of $f$ after applying the oracle) is actually not necessary. 
+\subsection{Groups and their Properties}
+
+A group is an algebraic structure that obeys the axioms
+\begin{def*}[(Abelian) Group $(G,\odot)$]\phantom{...}\\
+A set of elements $G = \left\{e_k\right\}_{k=1}^N$ with group action $\odot: G\times G
+\rightarrow G $ and axioms
+\begin{align*}
+    &a,b,c\in G: (a\odot b)\odot c = a\odot (b\odot c)& \text{associativity}\\
+    &\exists e\in G, \forall g\in G:  e\odot g = g\odot e = g &\text{neutral element}\\
+    &\forall g\in G, \exists g^{-1}\in G: g\odot g^{-1}= g^{-1}\odot g = e & \text{inverse element}
+\end{align*}
+If additionally the group action commutes
+\begin{align}
+    \forall a,b\in G: a \odot b = b\odot a
+\end{align}
+the group is called \textit{abelian}
+\end{def*}
+Note that we used $\odot$ as a group action and not as a binary inner product to follow standard notation. If we are dealing with a concrete realization or a \textit{representation} of a group, we replace $\odot$ with the corresponding symbol that is most suitable (e.g. $\odot \rightarrow +$ if we are using addition of numbers.\\
+The usual examples are: 
+\begin{itemize}
+    \item $(\mathbb{Z},+)$ (integers under addition)
+    \item $(\mathbb{C}^{N\times M}, +)$ (matrices under addition)
+    \item $(\text{Herm}(N),+)$ (Hermitian $N\times N$ matrices under addition)
+    \item $(U(N), \cdot )$ (Unitary $N\times N$ matrices under matrix-multiplication)
+\end{itemize}
+which are, except for the last one, all abelian.
+To test your understanding of the notion of a group: show that $(\mathbb{Z},\cdot)$, $(\mathbb{R}, \cdot)$ and $(\mathbb{N}, +)$ are not groups and explain why general matrices under matrix multiplication do not form a group.\\
+
+Prominent Abelian groups are the cyclic groups that can be represented by integers with modular addition or rotations in vector spaces.
+\begin{def*}[Cyclic Group]
+The cyclic group $C_n$ is an abelian group of $n$ elements $C_n = \left\{g_0,g_1,g_2,g_3,\dots g_{n-1}\right\}$ with
+\begin{align}
+    &g_0\odot g_k = g_k & \text{neutral element}\\
+    &g_1 \odot g_k = g_{(k\oplus_n1) } & \text{cyclic property}
+\end{align}
+where $\oplus_n$ denotes addition modulo $n$.
+The element $g_1$ is called the \textit{generator} of the cyclic group and a typical notation is $G=\left\{e,g,g^2,g^3,\dots, g^{n-1}\right\}$.
+\end{def*}
+This is indeed a group: the inverse element of $g^k$ is $g^{n-k}$, since the neutral element is $e=g^0=g^n$. The typical example of a representation of $C_n$ is $\mathbb{Z}/n\mathbb{Z}$ integers with addition modulo $n$. 
+A single bit is a realization of the group $C_2$ with $(\left\{0,1\right\},\oplus)$, two bits form the group $\left(\left\{0,1,2,3\right\}, \oplus_3\right)$. 
+If we use bitwise binary addition, denoted as a simple $\oplus$, we have further examples for groups: $(\left\{\mathbf{0},\mathbf{1},\mathbf{2},\mathbf{3}\right\}, \oplus)$~\footnote{e.g. $\mathbf{1}\oplus\mathbf{3} = (0,1)\oplus(1,1) = (0\oplus 1, 1\oplus 1) = (1,0) = \mathbf{2}$} or more general $(\left\{\mathbf{k}\right\}_{k=0}^{2^N-1}, \oplus)$ we have a group with neutral element $\mathbf{0}$ and self-inverse elements. On first glance this doesn't appear to be a cyclic group, and it isn't, but it is isomorphic to the direct product of $N$ cyclic $C_2$ groups: $C^N_2:=C_2\times C_2\times \dots \times C_2$.\\
+To continue with the quantum algorithms we unfortunately still need some vocabulary.
+
+\begin{def*}[Subgroup]\phantom{...}\\
+A subgroup $A\leq G$ of a group $(G,\odot)$ is a subset $A\subseteq G$ of the group elements such that $(A,\odot)$ is a group. Trivial subgroups are $A=\left\{e\right\}$ and $A=G$. The 
+\end{def*}
+Examples: The groups $(\mathbb{Z}, +)$ has no non-trivial subgroups. The group $(\text{Herm}(N), +)$ is a subgroup of $(\mathbb{C}^{N\times M}, +)$. The group $SU(N): \left\{e\in U(N)\;|\; \det(e)=1\right\}$ is a subgroup of $U(N)$ and each set of bitstrings with $M\leq N$ set to $0$ is a subgroup of $C_2^N$.\
+\begin{def*}[Generating Set]\phantom{...}\\
+A generating set $S\subseteq G$ of a group $(G,\odot)$ has the property
+\begin{align*}
+    \forall g\in G:  g=s_1\odot s_2\odot \dots \odot s_M
+\end{align*}
+with finite $M$ and $s_k\in S$ or $s_k^{-1}\in S$.
+Meaning every element of the group can be generated by a finite combination of generating elements under the group action. If $S$ generates $G$ we write $G = \langle S\rangle $.
+\end{def*}
+Example: The notion of a generating set gives us an alternative definition of cyclic groups: the groups that can be generated by a single element $C_n = \langle \left\{g\right\}\rangle $ but also $C_n = \langle g^2\rangle$ and so on. The group of integers under addition  $(\mathbb{Z}, +)=\langle \left\{1\right\}\rangle $ is generated by a single element.~\footnote{the neutral element is for example generated via $0=1-1$, since the inverse of the generating elements can be used as well. In the same way, we can generate the negative numbers.} A generating set for the group $(\mathbb{R}, +)$ is the set $S=(0,1)\subset \mathbb{R}$ since for any  $x\in \mathbb{R}$ we can chose a $n\in \mathbb{N}$ such that $x/n<1$ meaning that $s=x/n\in S$ if we add this number $n$ times, we get $x$ back: $x=nx/n=ns=s+s+s+\dots +s$. This construction works for every $x\in \mathbb{R}$ and there are always finitely many additions: so we have a generating set.
+\begin{def*}[Annihilator]\phantom{...}\\
+The annihilator of a subgroup $A\leq G$ of an abelian group $G$ is defined as
+\begin{align}
+    A^\perp := \left\{g\in G \mid \forall a\in A :\chi_g(a)=1\right\}.
+\end{align}    
+\end{def*}
+The annihilator~\footnote{naming is horrible in this context ... sorry} collects all elements whose characters are 1 for the operations in the respective subgroup. The annihilator itself is also a subgroup $A\leq G \Rightarrow A^\perp \leq G$.~\footnote{this is \textit{not} the case for non-abelian groups which also is one of the reasons why we are restricting ourselves here to abelian groups.}
+
+\subsection{Fourier Transforms on Groups}
+
+\begin{def*}[Representation of a Group] \phantom{...}\\
+A map $f: G \rightarrow GL(V)$ that maps elements of a group $(G,\odot)$ to linear operators on the vector space $V$ such that the group action is preserved under the linear operators
+\begin{align*}
+    &c=a\odot b \Rightarrow f(c)=f(a)f(b) 
+\end{align*}
+is called a representation of the group $G$ on $V$. 
+\end{def*}
+In other words, the representation is a homomorphism~\footnote{homo (same) morph (form): this essentially means structure preserving} of the group onto linear operators of a vector space. Note that the preservation of the group action also preserves neutral and inverse elements
+\begin{align*}
+f(a^{-1}) &= f(a)^{-1}\\
+    f(e) &= 1.\\
+\end{align*}
+Some examples:
+The cyclic group $C_4$ is fully characterized over the abstract elements $(\left\{e,g,g^2,g^3\right\}, \odot)$ where $g^3 = g\odot g \odot g$ and $g^3\odot g=e$. If we write $C_4=(\left\{0,1,2,3\right\},\oplus_4)$ its not a representation in the sense of the definition, but rather a realization of the group with numbers (we did not map it to linear operators). A one-dimensional representation $f:C_4 \rightarrow GL(\mathbb{C})$ can be realized as mapping to the one-dimensional matrices (which are just numbers) acting on the one-dimensional vector space of complex numbers
+\begin{align}
+    \left\{e,g,g^2,g^3\right\} \mapsto \left\{1,i,-1,-i\right\}
+\end{align}
+but also 
+\begin{align}
+    \left\{e,g,g^2,g^3\right\} \mapsto \left\{1,-1,1,-1\right\}
+\end{align}
+would be a valid representation. We can also map all elements to $f(e)=f(g)=f(g^2)=g(g^3)=1$ to the unit operation which gives us a trivial representation of the group. Another example that uses two dimensional complex matrices
+\begin{align}
+f(e) = \begin{pmatrix}
+    1 & 0 \\ 0 & 1 \end{pmatrix}, \; f(g) = \begin{pmatrix}
+    0 & 1 \\ 1 & 0 \end{pmatrix},\; f(g^2)=\begin{pmatrix}
+    1 & 0 \\ 0 & 1 \end{pmatrix}, \; f(g^3)=\begin{pmatrix}
+    0 & 1 \\ 1 & 0 \end{pmatrix}
+\end{align}
+that is also a valid representation, but seems a bit redundant. And indeed we can \textit{reduce} this representation to a direct sum of two one-dimensional representations. To see this, we apply the transformation $M_k = Uf(g^k)U^\dagger$ to all four matrices and we use the matrix~\footnote{You might have recognized that this is the Hadamard matrix, but this is a coincidence (or bias of the lecturer when thinking about examples)}
+\begin{align}
+    U = \frac{1}{\sqrt{2}}\begin{pmatrix}
+        1 & 1\\1 & -1
+    \end{pmatrix}.
+\end{align}
+The transformed matrices $A_g$ are a representation of the group as well
+\begin{align}
+    M_0 = \begin{pmatrix} 1 & 0 \\ 0 & 1 \end{pmatrix},\;
+    M_1 = \begin{pmatrix} 1 & 0 \\ 0 & -1 \end{pmatrix},\;
+    M_2 = \begin{pmatrix} 1 & 0 \\ 0 & 1 \end{pmatrix},\;
+    M_3 = \begin{pmatrix} 1 & 0 \\ 0 & -1 \end{pmatrix},\;
+\end{align}
+since this is diagonal we can treat the first and second components individually, the first components are the trivial representation ($f_1(g^k)=1$) while the second components are the $f_2(g^k)=(-1)^k$ representation we saw above: mathematically this is a direct sum of two one dimensional representations, often written as $f_1 \oplus f_2$. 
+For representations of Abelian groups a diagonalizing matrix like the one in the example above can always be found. The individual one-dimensional representations are called \textit{irreducible} representations or short ``irreps''. The individual numbers that make up the one-dimensional representations are called the characters,~\footnote{in general, the character of a representation of a group element is the trace of the corresponding matrix} The group $C_4$ has four irreducible representations
+\begin{align}
+    A_0=\left\{1,1,1,1\right\},\;
+    A_1=\left\{1,-1,1,-1\right\},\; 
+    A_2=\left\{1,i,-1,-i\right\},\;
+    A_3=\left\{1,-i,-1,i\right\},\; 
+\end{align}
+three of them we have already encountered. We will denote the characters of them by $\chi_k(g)$ where $k$ enumerates the irreducible representations, e.g. $\chi_1(g)=1$, $\chi_k(e)=1$, $\chi_4(g^3)=-i$. 
+\begin{theorem*}[irrep properties]
+Irreducible representations of finite Abelian groups
+\begin{itemize}
+    \item one-dimensional representations (they are $|G|$ complex numbers $e^{i\varphi}$)
+    \item there are $|G|$ distinct irresducible representations 
+    \item if represented as $|G|$ dimensional vectors they span an orthogonal basis 
+\end{itemize}
+\end{theorem*}
+We won't proof those properties here, but it is a good exercise to at least check if they hold for the examples we encountered.
+The last property essentially states that characters of irreducible representation are orthogonal, meaning that we have something like an inner product
+\begin{align}
+    \sum_{g\in G} \chi_k^*(g) \chi_l(g) = |G|\delta_{kl}.
+\end{align}
+If we view the characters as normalized vectors, $$\ket{\chi_k} := 1/|G| \begin{pmatrix}\chi_k(e) & \chi_k(g) & \chi_k(g^2) & \dots &\chi_k({g^{|G|-1}}))\end{pmatrix}^T,$$ for example in the case of $C_4$
+\begin{align}
+    \ket{\chi_1} = \frac{1}{2} \begin{pmatrix}1\\1\\1\\1\end{pmatrix},\;
+    \ket{\chi_2} = \frac{1}{2} \begin{pmatrix}1\\-1\\1\\-1\end{pmatrix},\;
+    \ket{\chi_3} = \frac{1}{2} \begin{pmatrix}1\\i\\-1\\-i\end{pmatrix},\; 
+    \ket{\chi_4} = \frac{1}{2} \begin{pmatrix}1\\-i\\-1\\i\end{pmatrix}, 
+\end{align}
+we note that they span a basis for $\mathbb{C}^{|G|}$ where $|G|$ denotes the number of elements in the group (e.g. $|C_4|=4$). If we want to transform from the standard basis to the basis spanned by the irreps of a group we can perform the following operation 
+\begin{align*}
+    U_G\ket{k} = \ket{\chi_k}
+\end{align*}
+that can be constructed as
+\begin{align*}
+    U_G = \sum_i \ket{\chi_i}\bra{i}
+\end{align*}
+with matrix elements
+\begin{align}
+    \bra{l}U_G\ket{k} = \sum_i \braket{l}{\chi_i}\braket{i}{k} = \chi_k(g_l),
+\end{align}
+which is also called the \textit{Fourier transform} under the group $G$.
+For general cyclic groups $C_N$ the Fourier coefficients (the characters of the group) take a familiar form
+\begin{align}
+    G=C_N \;:\;\chi_k(g_l) = e^{2\pi i \frac{kl}{N}}
+\end{align}
+of the ``usual'' discrete Fourier transform. We can recover two other familiar cases
+\begin{align}
+    C_2 \;:\; \chi_k(g_l) = (-1)^{kl} 
+\end{align}
+which are the elements of the Hadamard matrix, and\footnote{here $\odot$ denotes the bitwise binary inner product: $\mathbf{k}\odot \mathbf{l} = \left( \sum_{i=1}^{N} k_i l_i \right)\mod 2$}
+\begin{align}
+    C_{2}^N \;:\;\chi_{k}(g_l) = (-1)^{\mathbf{k}\odot \mathbf{l}}
+\end{align}
+which are the matrix elements of $\hd\otimes\hd\otimes\dots\otimes\hd$.
+
+
+
+\subsection{The Hidden Subgroup Problem}
+The quantum algorithm for \texttt{Simon} can be generalized to the hidden subgroup problem (HSP) that aims to find a subgroup $A\leq G$ within a given abelian group $G$.
+\begin{def*}[Hidden Subgroup (HSP)]\phantom{...}\\
+Consider an abelian group $G$ and a integer valued function $f:G\rightarrow I\subset \mathbb{N}$ that \textit{hides} a subgroup $A\leq G$ through
+\begin{align}
+    f(x)=f(y) \Leftrightarrow Ax=Ay 
+\end{align}
+for $x,y\in G$ and with the \textit{cosets}
+\begin{align}
+    Ax = \left\{a\odot x \;|\; a\in A\right\}.
+\end{align}
+\end{def*}Now, what does this have to do with Simon's problem? Lets translate:
+In Simon's problem, the group function is defined on $N$-bits. The corresponding bitstrings $\mathbf{x}\in\left\{0,1\right\}^N$ form a group -- there could be different group actions, but we can chose bitwise addition $\mathbf{a}\oplus\mathbf{b}:=(a_1,a_2\dots a_N)\oplus(b_1,b_2,\dots b_N)=(a_k\oplus b_k)_{k=1}^N = \mathbf{c}$. The abstract group for this is the direct product of cyclic groups we have encountered in the last section
+\begin{align}
+    C^N_{2} = C_2 \times C_2 \times C_2 \times \dots \times C_2.
+\end{align}
+The subgroup to Simon's problem hides the sought bitstring $\mathbf{y}$~\footnote{we need the neutral element $\mathbf{0}$ so that $A$ is a group. One could also rephrase Simon's problem as decision problem that asks if the hidden string is $\mathbf{0}$ or something else.} and is therefore 
+\begin{align}
+    A=\left\{\mathbf{0},\mathbf{y}\right\}.
+\end{align}
+Note that $1\leq |A| \leq 2$ since it can happen that $\mathbf{y}=\mathbf{0}$ (this is the special case, we discussed briefly above). 
+The annihilator of this group are all elements of $C^N_2$ whose characters of the operations in $A$ are 1, the characters of $C^N_2$ are $\chi_\mathbf{k}(\mathbf{l})= (-1)^{\mathbf{k}\odot \mathbf{l}}$, so the annihilator of the hidden subgroup $A$ is 
+\begin{align}
+    A^\perp = \left\{\mathbf{k} \;|\; \mathbf{k}\odot \mathbf{y} = 0\right\}
+\end{align}
+with the bitwise inner product $\odot$.~\footnote{now, the naming of this specific set from before probably makes sense in hindsight, and the name ``annihilator'' as well: what gets annihilated is the generator of the character. }
+% First, see that this is indeed a subgroup of $C^N_2$: the neutral element is $\mathbf{0}$ and since $\mathbf{0}\odot \mathbf{y}=0$ for any choice of $\mathbf{y}$ we have $\mathbf{0}\in A$. At the same time, since all members of $C_2^N$ are self inverse, all members of $A$ also are their own inverses. At last we need to verify closedness under the group action (which is bitwise binary addition), suppose we have two $\mathbf{i},\mathbf{j}\in A$, then we can build $\mathbf{k}=\mathbf{i}\oplus \mathbf{j}$ but then $\mathbf{k}\odot\mathbf{y} = \mathbf{i}\odot \mathbf{y} \oplus \mathbf{j}\odot \mathbf{y} = 0\oplus 0$ and therefore $\mathbf{k}\in A$. We have $A\leq C^N_2$, but is it the right subgroup for the hidden subgroup problem?
+% Yes, because in Simon's problem we have
+% \begin{align}
+%     f(\mathbf{x})=f(\mathbf{x\oplus \mathbf{y}})
+% \end{align}
+% for all $\mathbf{x}\in C^N_2$. So if we have two $\mathbf{i},\mathbf{j}$ for which $f(\mathbf{i}) = f(\mathbf{j})$ then $\mathbf{i} = \mathbf{j} \oplus \mathbf{y}$. The relevant cosets are
+% \begin{align}
+%     \mathbf{i}A &= \left\{\mathbf{k}\oplus \mathbf{i} \;|\; \mathbf{k}\in A\right\}\nonumber \\
+%     &= \left\{\mathbf{k}\oplus (\mathbf{j}\oplus \mathbf{y}) \;|\; \mathbf{k}\in A\right\} \nonumber\\
+%     &= \left\{\mathbf{j}\oplus (\mathbf{k}\oplus \mathbf{y}) \;|\; \mathbf{k}\in A\right\} \nonumber\\
+%     &= \left\{\mathbf{j}\oplus \mathbf{k}' \;|\; \mathbf{k}'\in A\right\} = \mathbf{j}A
+% \end{align}
+% where we have used $\mathbf{y}\in A$ and through the group's closedness under its action $\mathbf{k}'=(\mathbf{k}\oplus \mathbf{y})\in A$ for all $\mathbf{k}\in A$.
+\subsection{Quantum Algorithm for \texttt{HSP}}
+Now that we have a nice guiding example through \texttt{Simon} at hand, let's see how the general quantum algorithm for the \texttt{HSP} looks like. 
+We make use of an oracle again, that implements us the function $f$ on two qubit registers
+\begin{align}
+    U_f\left(\ket{g}\otimes\ket
+    0\right)=  \ket{g}\otimes \ket{f(g)}
+\end{align}
+where the states $\ket{g}$ are encoded into a register with enough qubits to represent all $|G|$ elements of the group of interest. For the example $C^N_2$ these are $N$-qubits and for the $C_4$ example two qubits will be enough. For the second register a single qubit suffices as $f:G\rightarrow \left\{0,1\right\}$ maps to a single bit.
+\begin{algo*}[\texttt{HSP}]
+Execute the circuit
+\begin{center}
+$ U_\text{S}$ = \begin{quantikz}
+& \gate{\hd^{\otimes N}} & \gate[2]{U_f}& \gate{\mathcal{F}^\dagger} & \qw \\
+& \qw  &[1cm] & \qw & \qw\\
+\end{quantikz}
+\end{center}
+\end{algo*}
+The first part of the circuit creates the state
+\begin{align}
+    \ket{0}^{\otimes N} \xrightarrow[]{U_f \hd^{\otimes N}}& \frac{1}{\sqrt{|G|}}\sum_{g\in G}\ket{g}\otimes\ket{f(g)} \nonumber
+\end{align}
+Read out the second register and get one value $f(h)$ back, the first register is now in superposition of all states $\ket{g}$ such that $f(g)=f(h)$
+\begin{align}
+ \frac{1}{\sqrt{|B|}}\sum_{b\in B} \ket{b},\;\;B=\left\{g\in G\;|\; f(g)=f(h)\right\}.
+\end{align}
+From the structural promise of the problem, we know however that these musst be the cosets $bA$ that should be identical for all $b\in B$, so we can just pick the candidate $h$ that we measured and we know $bA=hA$ for all $b\in B$. 
+With this insight, we can write the remaining state as
+\begin{align}
+ \frac{1}{\sqrt{|B|}}\sum_{b\in B} \ket{b} = \frac{1}{\sqrt{|hA|}}\sum_{x\in hA} \ket{x} = \frac{1}{\sqrt{|A|}} \sum_{a\in A} \ket{a\odot h}.
+\end{align}
+The last part follows from the definition of the coset $hA = \left\{a\odot h \;|\; a\in A\right\}$ -- note that $|A| = |bA|$ holds in general.
+We are now at the same stage as in Eq.~\eqref{eq:simon-1}: if we read out the remaining register, we get some information of the unknown element $a$, but it will not really help us yet with regards to efficiency. Similar to \texttt{Simon} we are continuing with a Fourier transform on the group 
+\begin{align}
+    \ket{\psi}=\frac{1}{\sqrt{|A|}} \sum_{a\in A} \ket{a\cdot h} \xrightarrow[]{\mathcal{F}} \ket{\hat{\psi}} &=\frac{1}{\sqrt{|G|}}\sum_{k\in G} \sum_{a\in A} \chi_k(a\cdot h) \ket{{k}} \nonumber\\
+    &= \frac{1}{\sqrt{|G|}} \sum_{k\in G} \sum_{a\in A} \chi_k(a)\chi(h) \ket{k}\\
+\end{align}
+Now we can use properties of the annihilator
+\begin{align}
+    \sum_{a\in A}\chi_k(a) = \begin{cases}
+        |A|, & k\in A^\perp \\
+        0 , & \text{else}
+    \end{cases}
+\end{align}
+and end up with the state
+\begin{align}
+    \ket{\hat{\psi}}=\frac{|A|}{\sqrt{|G|}} \sum_{k\in A^\perp} \chi_k(h) \ket{k}\\
+\end{align}
+%which maps the classical basis states (the bitstrings $\ket{\mathbf{k}}$) to the characters of the group. Before, the characters where products of $\ket{\pm}$ states, now they are more abstract states $\ket{\chi_k}$, and depend on the group $G$ of the chosen instance of the problem. The basis states $\ket{a\cdot h}$ are therefore mapped to the corresponding character states $\ket{\chi_{h\cdot A}}$ which are linear combinations of the classical basis states with the group characters as probability amplitudes. At this point it is important to remember, that for characters (which are essentially a one-dimensional representation of the group) it holds $\chi_{h\cdot a} = \chi_{h}\chi_a$. 
+In summary the Fourier transform acts as
+\begin{align}
+     \frac{1}{\sqrt{|A|}} \sum_{a\in A} \ket{a\cdot h} \xrightarrow[]{\mathcal{F}} &\frac{1}{\sqrt{|A|}} \sum_{a\in A} \ket{\chi_{a\cdot h}} = \frac{1}{\sqrt{|A||G|}} \sum_{a\in A} \sum_{g\in G}\chi_{a\cdot h}(g)\ket{g}\nonumber\\
+     &= \frac{1}{\sqrt{|A||G|}} \sum_{g\in G} \chi_h(g)\left(\sum_{a\in A}\chi_{a}(g)\right)\ket{g}.
+\end{align}
+At this point, we need a property of the characters and the definition for generating sets. If the element $g$ is in a generating set of the subgroup $A$, then we have
+\begin{align}
+    \sum_{a\in A} \chi_a(g) = |A|
+\end{align}
+and otherwise the sum equates to zero. 
+If we use this property for the formulat above we arrive at
+\begin{align}
+    \frac{1}{\sqrt{|A|}} \sum_{a\in A} \ket{a\cdot h} \xrightarrow[]{\mathcal{F}} & \frac{\sqrt{|A|}}{\sqrt{|G|}} \sum_{g\in \bar{A}} \chi_h(g)\ket{g}
+\end{align}
+which is a equally weighted (w.r.t to probabilities, because the characters can only be $\pm 1$) superposition of all elements of the generating set of the subgroup. If we read-out the remaining register, we are therefore always getting one element of the generating set. To determine the subgroup $A$ we can therefore expect to get away with $O(|A|)$ repetitions.
+
+\subsection{Examples for the Abelian HSP}

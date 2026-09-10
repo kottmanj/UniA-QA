@@ -1,0 +1,529 @@
+\section{Variational Quantum Algorithms}
+
+Variational (quantum) algorithms are a broad subclass of algorithmic approaches towards the groundstate problem from many-body chemistry and physics. 
+\begin{def*}[Groundstate Problem]
+Given a (sparse) Hamiltonian $H$ -- estimate the lowest eigenvalue. Optional: estimate the corresponding eigenvector
+\end{def*}
+In this course, we will focus on variational algorithms designed for quantum computers -- often called variational quantum algorithms (VQA), variational quantum eigensolvers (VQE), or quantum approximate optimization algoritjms (QAOA). 
+There are however many other applications that employ the same principles. To name a few:
+\begin{itemize}
+    \item Density Functional Theory (DFT) -- the ``powerhouse'' of computational chemistry is based on variational algorithms (although DFT itself is not variational with respect to the original many-body Hamiltonian anymore, it is still variational with respect to the fixed energy functional)
+    \item QAOA - the quantum approximate optimization algorithm, designed to solve combinatorical problems on quantum computers
+    \item Many top notch algorithms from classical quantum chemistry: Configuration interaction (CI), Density matrix renormalization group (DMRG), other types of tensor networks, neural quantum states.
+\end{itemize}
+It is at this point not necessary nor required to know any of the above acronyms. However, you might encounter one of those at some point and maybe remember some of the basics about variational algorithms. 
+
+\subsection{Expectation Values}
+An expectation value (or ``expected value'') of an observable given by the Hermitian matrix $H$ with respect to a quantum state $\ket{\psi}$ is just the average result that you would get over repeated measurements. Meaning if you implement the protocol:
+\begin{enumerate}
+    \item Prepare the state $\ket{\psi}$
+    \item Measure observable $H$, collect the obtained eigenvalue $E_i$
+    \item Repeat $n$ times and build the average: $\sum_{k=1}^n E_{i_k}/n$ 
+\end{enumerate}
+As our observables are usually Hamiltonians (i.e. the ``energy'' of a system) we will denote the eigensystem as
+\begin{align}
+    H\ket{E_i} = E_i \ket{E_i},
+\end{align}
+and will further always assume that the eigenvalues are ordered: $E_0 \leq E_1 \leq E_2\leq \dots $.
+At this point, it's again useful to re-iterate the sections on eigensystems of Hermitian matrices ($E_i\in \mathbb{R}$ and $\braket{E_i}{E_j}=\delta_{ij}$ in the appendix.
+\begin{def*}[Expectation Value] For a given observable $H$ and quantum state $\ket{\psi}$ the expectation value of the observable w.r.t the state is
+\begin{align} 
+    \langle H \rangle_\psi := \bra{\psi}H\ket{\psi},
+\end{align}
+\end{def*}
+To see why this is indeed the result of the protocol above with $n\rightarrow \infty$ we represent the state $\ket{\psi}$ in the eigenbasis of $H$
+\begin{align}
+    \ket{\psi} = \sum_{i} c_i \ket{E_i}
+\end{align}
+with $c_i=\braket{E_i}{\psi}$ the probability amplitude that we observe the system in eigenstate $\ket{E_i}$. If we plug this into the definition above we get
+\begin{align} 
+     \bra{\psi}H\ket{\psi} &= \sum_{ij} c_i^* c_j \bra{E_i}H\ket{E_j}\nonumber\\
+     &= \sum_{ij} c_i^* c_j \bra{E_i}E_j\ket{E_j}\nonumber\\
+      &= \sum_{ij} c_i^* c_j E_j \delta_{ij}\nonumber\\
+       &= \sum_{ij} |c_i|^2 E_i\nonumber\\
+\end{align}
+so this is just a sum over all possible eigenvalues weighted by the probability to observe them.
+\vspace{0.5cm}
+\hline
+\vspace{0.5cm}
+Example: Let's look at a simple Observable given by the Pauli-Z matrix
+\begin{align}
+Z = \begin{pmatrix}
+    1 & 0\\ 0 & -1
+\end{pmatrix}
+\end{align}
+its eigenstates are just the standard basis states of a single qubit with eigenvalues $+1$ for $\ket{0}$ and $-1$ for $\ket{1}$. Let's consider a single qubit in the symmetric superposition of the two basis states, namely the $\ket{+} = \frac{1}{\sqrt{2}}\left(\ket{0}+\ket{1}\right)$ state. If we measure the observable given by $Z$ we either get $+1$ or $-1$, each with a probability of $\frac{1}{2}$. We can directly see, that the expected value is the average result over infinite repetitions -- in this case the average result will be 0 as $+1$ and $-1$ are obtained with equal probabilities. Let's check via the definition by simply applying the matrix $Z$ to the state $\ket{+}$ and then take the inner product with $\bra{+}$:
+\begin{align}
+    \expval{Z}_{+} &= \bra{+}Z\ket{+} = \bra{+}\frac{1}{\sqrt{2}}\left(Z\ket{0} + Z\ket{1} \right) \\
+    &= \bra{+} \frac{1}{\sqrt{2}}\left( \ket{0} - \ket{1}\right) = \braket{+}{-} = 0.
+\end{align}
+So we arrive at the result we intuitively suspected -- remember that the states $\ket{\pm}$ are orthogonal.
+\vspace{0.5cm}
+\hline
+\vspace{0.5cm}
+The computation of expectation values is usually easier to realize on quantum processors than to implement measurement protocols that extract eigenvalues. The trick is, to write the observable $H$ as a sum of simpler observables $h_k$ weighted by coefficients $c_k$
+\begin{align}
+    H = \sum_{k} c_k h_k,
+\end{align}
+now the expectation value of $H$ becomes the weighted sum of the expectation values of the individual $h_k$.
+\begin{theorem*}
+The expectation value of an observable that is a weighted sum of other observables is the weighted sum of their expectation values
+\begin{align}
+    \langle H \rangle_\psi = \sum_k a_k \langle h_k \rangle_\psi.
+\end{align}
+\end{theorem*}
+If we know how to diagonalize the small observables $h_k$ (e.g. with a unitary $U_k$) their eigenvalues become easy to measure. 
+We first apply $U_k^\dagger$ to our qubit state, then we read-out the qubits, if we read out $\ket{\mathbf{l}}$ then this corresponds to the $l$th eigenvalue of $h_k$.
+
+\subsubsection*{Pauli Expectation Values}
+We have seen already, that any Hermitian matrix can be written in the Pauli representation 
+\begin{align}
+    H = \sum_{k} c_k P_k.
+\end{align}
+Using the property of expectation values from above we then have
+\begin{align}
+    \langle H \rangle + 
+\end{align}
+
+
+
+\subsection{The variational principle}
+The foundation of variational computing for groundstates is the variational principle.
+\begin{theorem*}[Variational Principle]
+For a given Hermitian matrix $H$ on $N$-qubits, \textit{any} expectation value is always larger or equal to the smallest eigenvalue $E_0$. Or in other words
+\begin{align}
+    E_0 = \min_{\ket{\psi}} \langle H \rangle_{\psi}
+\end{align}    
+the smallest eigenvalue van be obtained through global minimization on the $2^N$ dimensional unit sphere (since $\ket{\psi}$ normalized).
+\end{theorem*}
+The proof can be conducted by using the fact that the eigenstates of $H$ span a basis~\footnote{c.f. appendix: resolution of the identiy $1 = \sum_k \ket{E_k}\bra{E_k}$} 
+\begin{align}
+    H \ket{\psi} &= \sum_k c_k H\ket{E_k} \\
+    &= \sum_k c_k E_k \ket{E_k}
+\end{align}
+and therefore
+\begin{align}
+    \bra{\psi}H\ket{\psi} = \sum_{kl} c^*_l c_k E_k \delta_{kl} = \sum_{k} |c_k|^2 E_k 
+\end{align}
+This sum is equal to $E_0$ if and only if $c_0=1$ (due to normalization all $c_k$ with $k\neq0$ have to be zero then), meaning $\ket{\psi}=\ket{E_0}$. For all other states the sum above can never go below $E_0$
+\begin{align}
+    E_0 = 1\cdot E_0 =   \left(\sum_k |c_k|^2 \right) E_0 = \sum_{k} |c_k|^2 E_0 \leq \sum_{k} |c_k|^2 E_k
+\end{align}
+since $E_k > E_0$ for all $k>0$.
+
+\subsubsection*{The variational principle in practice}
+
+We can make use of the variational principle to determine ground states of arbitrary Hamiltonians (energy operators) through a minimization problem. 
+Optimizing over \textit{all} possible states is however impractical, so one usually finds a parametrization of the wavefunction
+\begin{align}
+    \ket{\psi} = \ket{\psi(\theta)}, \theta \in \mathbb{R}
+\end{align}
+usually with real parameters, and optimizes over the those
+\begin{align}
+    E_0 \leq \min_{\theta} \langle H \rangle_{\psi(\theta)}. 
+\end{align}
+Now the variational principle gives us an upper bound on the true ground state energy, as we are not guaranteed that our chosen parametrization is able to actually represent the true ground state -- one refers to this as the \textit{expressibility} of the wavefunction ansatz.\footnote{Finding a suitable parametrization is usually referred to as an ``ansatz'' for the true eigenstate. So we have two German words clustered together here. For some reason the scientific community loves the word ``ansatz'' which often leads to interesting constructs when the plural is formed. The same goes for eigenvalue/vector, where there is also the english version ``characteristic'' value/vector}.
+
+\subsection{Differentiable Structures}
+
+Variational quantum algorithms aim to minimize a given parametrized expectation value $E(\theta) = \expval{H}{\Psi(\theta)}$. In order to perform the minimization it is a major advantage to also have access to the derivative $\partial E/\partial\theta $ of the expectation value.
+In the following, we will learn how to compute such derivatives.
+The result is quite surprising, as it is in a sense optimal -- evaluation of the exact derivative of an expectation value will come at the cost of evaluating that expectation value twice.\\
+We will start with Pauli-Gates and will afterwards sketch generalizations.
+
+\subsubsection*{Derivatives of Pauli-Gates}
+\begin{align}
+    \frac{\partial}{\partial \theta} R_\mathbf{k}(\theta) = \frac{\partial}{\partial \theta}  e^{-i\frac{\theta}{2} P_\mathbf{k}} = -i\frac{1}{2} P_\mathbf{k}  e^{-i\frac{\theta}{2} P_\mathbf{k}} = -i\frac{1}{2} P_\mathbf{k} R_\mathbf{k}(\theta) 
+\end{align}
+
+We can simplify this, using the closed-form of the Pauli-Gate which gives us
+\begin{align}
+    P = iR_\mathbf{k}(\pi)
+\end{align}
+to get
+\begin{theorem*}
+The derivative of a Pauli-Gate with respect to its parameter is given by
+\begin{align}
+    \frac{\partial}{\partial \theta} R_\mathbf{k}(\theta) = \frac{1}{2}R_\mathbf{k}(\theta + \pi)
+\end{align}    
+\end{theorem*}
+
+We can use this identity to derive a closed-form for the analytic gradient of expectation values with respect to Pauli gates.
+For simplicity we will just use the state
+\begin{align}
+    \ket{\Psi(\theta} = R_\mathbf{k}(\theta)\ket{0}
+\end{align}
+and the corresponding derivative
+\begin{align}
+    \frac{\partial}{\partial \theta}\ket{\Psi(\theta} = R_\mathbf{k}(\theta+\pi)\ket{0} = \ket{\Psi(\theta + \pi}
+\end{align}
+for now, but when looking closer at the following derivations, we will realize that the final results hold for any-circuit where the Pauli-Gate $R_\mathbf{k}(\theta)$ is included at some arbitrary position (as long as it's the only gate carrying the parameter $\theta$). 
+The derivative of an expectation value with respect to such a state is then
+\begin{align}
+    \frac{\partial}{\partial \theta} \expval{H}{\Psi(\theta)}  =\left(\frac{\partial}{\partial \theta}\bra{\Psi(\theta)}\right)H\ket{\Psi(\theta)} + \bra{\Psi(\theta)} H\left(\frac{\partial}{\partial \theta}\ket{\Psi(\theta)}\right)
+\end{align}
+where we simply used the product rule of calculus. 
+We can now plug-in our formula for the derivative from above
+\begin{align}
+    \frac{\partial}{\partial \theta} \expval{H}{\Psi(\theta)} = \frac{1}{2}\left(\bra{\Psi(\theta+\pi)}H\ket{\Psi(\theta)} + \bra{\Psi(\theta)}H\ket{\Psi(\theta+\pi)}\right)
+\end{align}
+which will in the following be more convenient to have in operator form
+\begin{align}
+    \frac{\partial}{\partial \theta} \expval{H}{\Psi(\theta)} = \frac{1}{2}\left(\bra{0}R_\mathbf{k}((\theta+\pi))^\dagger H R_\mathbf{k}(\theta)\ket{0} + \bra{0}R_\mathbf{k}(\theta)HR_\mathbf{k}(\theta+\pi)\ket{0}\right)
+\end{align}
+we can rearrange this to~\footnote{use: $AHB + BHA = \frac{1}{2}\left((A+B)H(A+B) - (A-B)H(A-B)\right)$ with $A=R_\mathbf{k}(\theta+\pi)$ and $B=R_\mathbf{k}(\theta)$}
+\begin{align}
+    \frac{\partial}{\partial \theta} \expval{H}{\Psi(\theta)} =& \frac{1}{4}\left(\vphantom{\sum_k^l}
+    \bra{0}\left(R_\mathbf{k}(\theta) + R_\mathbf{k}(\theta+\pi)\right) H \left(R_\mathbf{k}(\theta) + R_\mathbf{k}(\theta+\pi)\right)\ket{0}
+    \right.\nonumber\\ &\left.\vphantom{\sum_k^l}- \bra{0}\left(R_\mathbf{k}(\theta) - R_\mathbf{k}(\theta+\pi)\right) H \left(R_\mathbf{k}(\theta) - R_\mathbf{k}(\theta+\pi)\right)\ket{0}\right).
+\end{align}
+On first glance, this didn't really help and it looks like things became more complicated instead of simpler. The trick is now, to find a better expression for $R_\mathbf{k}(\theta) \pm R_\mathbf{k}(\theta+\pi)$ which turns out to be~\footnote{derivation at the end of the chapter}
+\begin{align}
+    R_\mathbf{k}(\theta) \pm R_\mathbf{k}(\theta+\pi) = \sqrt{2} R_\mathbf{k}(\theta \pm \frac{\pi}{2}).
+\end{align}
+With this identity the gradient expression above becomes quite short, and furthermore we realize that it takes the form of a difference between two expectation values, that are equivalent to the original expectation values, just with shifted arguments. 
+
+\begin{theorem*}[shift-rule\footnote{M. Schuld \textit{et.al.}, PRA, 2018}]
+    Take a state parametrized by a single Pauli-Gate
+    \begin{align}
+        \ket{\Psi(\theta)} = A R_\mathbf{k}(\theta)B\ket{0}
+    \end{align}
+    where $A,B$ can be arbitrary unitaries.
+    The derivative of an expectation value of any observable $H$ with respect to such a state is
+    \begin{align}
+        \frac{\partial}{\partial \theta} \expval{H}{\Psi(\theta)} = \frac{1}{2}\left( \expval{H}{\Psi(\theta+\frac{\pi}{2})} - \expval{H}{\Psi(\theta-\frac{\pi}{2})}\right)\nonumber
+    \end{align}
+\end{theorem*}
+In shorter notation $E(\theta) = \expval{H}{\Psi(\theta)}$ we can also write
+\begin{align}
+    \frac{\partial}{\partial \theta} E(\theta) = \frac{1}{2}\left(E(\theta+\frac{\pi}{2}) - E(\theta-\frac{\pi}{2})\right).
+\end{align}
+Note that this takes the same form, and therefore comes with the same cost, as \href{https://en.wikipedia.org/wiki/Finite_difference}{finite differences}, which is also the cheapest numerical method to estimate gradients. A big difference is however that the shift-rule formula gives us the \textit{analytical} derivative and not just a numerical approximation.
+
+\subsubsection*{Generalized Scenarios}
+On first glance, the shift-rule formula looks as it is only applicable to specialized scenarios. This is however not true. In the following we will briefly list exemplary scenarios alongside solutions on how to apply the shift-rule to get gradients
+\paragraph{Repeating parameter:} Assume two Pauli-Gates $R_\mathbf{k}(\theta)$ and $R_{\mathbf{l}}(\theta)$  parametrized by the same parameter $\theta$. Without loss of generality we can assume a circuit $U(\theta) = AR_\mathbf{k}(\theta)BR_\mathbf{l}(\theta)C$. In this scenario the direct application of the shift rule is not possible.
+
+Lets consider an expectation value with respect to this circuit
+\begin{align}
+    f(\theta) = \expval{H}_{U(\theta)}
+\end{align}
+and in the following, we will write $f(\theta,\theta)$ to emphasize, that the angle $\theta$ appears in two gates.
+We can now apply the product rule from calculus and arrive at
+\begin{align}
+    \frac{\partial}{\partial \theta} f(\theta,\theta) = \frac{1}{2}\left(f(\theta+\frac{\pi}{2},\theta) - f(\theta-\frac{\pi}{2},\theta)\right) + \frac{1}{2}\left(f(\theta,\theta+\frac{\pi}{2}) - f(\theta,\theta-\frac{\pi}{2})\right)
+\end{align}
+
+\paragraph{Transformed parameters: } Assume that a Pauli-Gate depends on the a classical function $g(\theta)$ of a parameter $R_\mathbf{k}(g(\theta))$, in this case, we can apply the chain rule to get the derivative of an expectation value that depends on such a gate
+\begin{align}
+    \frac{\partial}{\partial \theta} f(g(\theta)) = \frac{\partial g}{\partial \theta} \frac{\partial f}{\partial g}  = \frac{\partial g}{\partial \theta}\frac{1}{2}\left(f(g(\theta)+\frac{\pi}{2}) - f(g(\theta)-\frac{\pi}{2})\right)
+\end{align}
+
+\paragraph{Non-Pauli Gates:} Assume that the gate $U(\theta)$, that we want to differentiate is not a Pauli-Gate. Then we can distinguish between three scenarios, where the last one is the default that always works.
+\begin{enumerate}
+    \item If $U(\theta) = e^{-i\frac{\theta}{2} G}$ with $G^2=1$ the gate has the same properties as a Pauli-Gate, and we can apply the shift-rule. If the factor $-1/2$ in the exponent doesn't work out, we can just transform the parameter accordingly and use the chain rule (see above). 
+    \item If $U(\theta) = e^{-i\frac{\theta}{2} G}$ and $G^2 = G$ we can create the generator $\tilde{G} = 2G-1$ for which $\tilde{G}^2 = 4G^2 -4G + 1 = 1$. We can now rewrite $e^{-i\frac{\theta}{2}G} = e^{-i\frac{\theta}{4}\tilde{G}} e^{-i\frac{\theta}{4}} = e^{-i\frac{\theta/2}{2}\tilde{G}} e^{-i\frac{\theta}{4}}$ and at this point we can use the chain rule again to get the same shift-rule just with 1/4 instead of 1/2.  
+    \item Default: Re-compile the circuit into Pauli-Gates (in principle this always works since they are universal). If the circuit is already given in a standard gate set 
+\end{enumerate}
+
+\subsubsection*{Beyond the plain shift-rule}
+For some cases, it might be worthwhile to invest some extra work and derive your own rules for the gradients. In the following, we will give a small example.\\
+
+Consider a gate $e^{-i\frac{\theta}{2}G}$ where the Generator is not exactly self-inverse $G^2\neq G$ but where $G^3=G$ holds again. 
+In a sense, such a gate is close to a Pauli-Gate, but still different enough so that the shift-rule can not be applied.
+Generators with eigenvalues $\left\{-1,0,+1\right\}$ have the above properties.
+We can see this, by writing the generator in it's spectral form~\footnote{You can write an Hermitian operator as the sum $H = \sum_k \lambda_k \ket{\Psi_k}\bra{\Psi_k}$ where $\lambda_k$ are the eigenvalues and $\ket{\Psi_k}$ the corresponding eigenvectors.}
+\begin{align}
+    G = P_+ - P_-
+\end{align}
+where $P_\pm$ are the projectors onto the eigenspaces with eigenvalues $\pm1$ (the eigenspace projector $P_0$ corresponding eigenvalue 0 does not show up, since it would be scaled with 0 anyway).
+Note, that due to orthonormality of the eigenvectors we have: $P_+P_- = P_- P_+= 0$ and $P_\pm^2 = P_\pm$ which leads us to the desired properties
+\begin{align}
+    &G = P_+ - P_-\\
+    &G^2 = P_+ + P_-\\
+    &G^3 = P_+ - P_- = G.
+\end{align}
+Also, due to completeness of eigenvectors of Hermitian matrices, we have: 
+\begin{align}
+    P_+ + P_- + P_0 = 1.
+\end{align}
+We can now create two new generators
+\begin{align}
+    G_{\pm} = G \pm P_0
+\end{align}
+that behave like Paulistrings
+\begin{align}
+    G_\pm^2 &= G^2 \pm 2GP_0 + P_0^2 = G^2 \pm 0 + P_0 \nonumber\\
+    &= P_+ + P_- + P_0 =  1
+\end{align}
+and we can represent the old generator as a sum of the new ones
+\begin{align}
+    G = G_+ + G_-
+\end{align}
+also note that $G_+$ and $G_-$ commute (so no Trotter approximation required).
+With this recipe, we can replace all gates that are generated by $G$ with two new gates generated by $G_\pm$, and those new gates are differentiable by the shift-rule.
+\begin{algo*}[Fermionic Shift-Rule]
+For gates $e^{-i\frac{\theta}{2}G}$ where the generator $G$ has three distinct eigenvalues $\left\{-1,0,1\right\}$ with corresponding eigenspace projectors $P_{-}, P_0, P_+$, we have
+\begin{align}
+    e^{-i\frac{\theta}{2} G} = e^{-i\frac{\theta}{2}G_+}e^{-i\frac{\theta}{2}G_-}
+\end{align}
+with $G_\pm = G \pm P_0$. The new generator behaves like a Pauli gate
+\begin{align}
+    G_\pm^2 = 1
+\end{align}
+and the generated gate is therefore directly shift-rule differentiable.
+\end{algo*}
+The name comes from the simulation of Fermionic systems where the generators of interest (Fermionic excitation generators) have exactly this property. Also some common known gates share this ``Fermionic'' property.
+A typical example is a controlled-Pauli gate $CR_\mathbf{k}$ that has the generator (see previous chapters) $\frac{1}{2}\left(1-Z\right)\otimes P_\mathbf{k}$. 
+The Paulistring $P_\mathbf{k}$ has eigenvalues $\pm 1$, but due to the control operation the eigenvalue $0$ is entering the game (all states where the control qubit is in $\ket{0}$ are automatically eigenstates with eigenvalue $0$.\\
+Due to the decomposition into two generators $G_+$ and $G_-$ the Fermionic shift rule requires 4 evaluations~\footnote{one can show, that in the case of real quantum states (only real probability amplitudes) we can simplify it to 2 evaluations, ending up at the same cost as the original shift-rule. This is especially helpful if one tries to solve for Fermionic groundstates, which are often real quantum states -- this would be the actual Fermionic shift-rule, while we have directly used a generalization that also holds for complex amplitudes. We will however not go into the details here.}. 
+Let's look at a multi-controlled Pauli-Gate and compare the Fermionic shift-rule with the default strategies (decomposition into Pauli gates). 
+No matter how many control elements we have, we can always apply the Fermionic shift rule (no new eigenvalues are generated), so we get away with 4 evaluations, independent of the number of controls. 
+If we decompose into Paulistrings we get 2 Paulistrings from the generator of the controlled-$R_\mathbf{k}$ gate
+\begin{align*}
+    \frac{1}{2}\left(1-Z\right)\otimes P_\mathbf{k} = \frac{1}{2}Z\otimes P_\mathbf{k} -\frac{1}{2}P_\mathbf{k}.
+\end{align*}
+In this case the cost for the gradient is the same (4 evaluations). 
+If we have two controls, we already get 4 Paulistrings
+\begin{align*}
+    \frac{1}{2}\left(1-Z\right)\otimes \frac{1}{2}\left(1-Z\right) \otimes P_\mathbf{k} = \frac{1}{4}\left(1\otimes 1\otimes P_\mathbf{k}-1\otimes Z\otimes P_\mathbf{k}-Z\otimes 1\otimes P_\mathbf{k}+Z\otimes Z\otimes P_\mathbf{k}\right),
+\end{align*}
+leading to 8 evaluations if we apply the shift rule. 
+For $n$ control qubits we get $2^n$ Paulistrings
+and therefore $2^{n+1}$ evaluations with the standard shift-rule. 
+So in this case, the Fermionic shift-rule pays off exponentially with respect to the number of controls.\\
+
+Besides the standard shift-rule and the Fermionic one, there are other schemes (e.g. the 4-point shift-rule, that works similar to the Fermionic one, and some generalized approaches). We will not go into the details here, but emphasize that it is often worthwhile to implement a customized method. 
+
+\subsection{Higher-Order Structures}
+In the previous sections we have seen how to form automatically differentiable structures based on expectation values.
+The observed techniques (combined with what we know from the chapter on quantum circuits) allow us to formulate variational algorithms driven by gradient descent and derived methods~\footnote{in principle we can also compute second or third derivatives, by just applying the shift-rule multiple times}.
+This works, as long as the quantum state is prepared by a single circuit
+\begin{align}
+    \ket{\Psi(\theta)} = U(\theta) \ket{\Psi(\theta)}
+\end{align}
+and $\theta$ can also include many individual variables. 
+An ``ansatz'' for our parametrized state that is a linear combination of states prepared by different circuits, for example
+\begin{align}
+    \ket{\Psi(\theta,\gamma,c_0,c_1} = c_0U_0(\theta)\ket{0} + c_1U_1(\theta)\ket{1}
+\end{align}
+would currently not be possible to use.\\
+Let's see how the expectation value of such a s state would look and identify the missing structures
+\begin{align}
+    \bra{\Psi}H\ket{\Psi} &= \left(c_0^*\bra{\psi_0} + c_1^*\bra{\psi_1}\right)H\left(c_0\ket{\psi_0} + c_1\ket{\psi_1}\right)\\\
+    &= |c_0|^2 \bra{\psi_0}H\ket{\psi_0} + |c_1|^2 \bra{\psi_1}H\ket{\psi_1} + c_0^*c_1\bra{\psi_0}H\ket{\psi_1} + c_1^*c_0 \bra{\psi_1}H\ket{\psi_0}. \nonumber \end{align}
+The first two elements on the right-hand side of the equations are expectation values (real numbers) but the last two are not, those are complex numbers called transition amplitudes.
+\begin{def*}[Transition Amplitude]
+    Given two states $\ket{\psi},\ket{\phi}$ and an observable $H$, the transition amplitude
+    \begin{align*}
+        h^\psi_\phi = \bra{\psi}H\ket{\phi}
+    \end{align*}
+    is a complex number with $h_\phi^\psi=\left(h_\psi^\phi\right)^*$.
+\end{def*}
+The name comes from the interpretation, that the state $\psi$ is transitioning into the state $\phi$ under the action of $H$. 
+An alternative name here is a ``matrix element'' of $H$. If we use the standard basis, then the elements $h^i_j=\bra{i}H\ket{j}$ represent the matrix components of the observable $H$.
+If the observable is just the unit matrix, the transition element becomes an inner product, or overlap, between the two states. Inner products between arbitrary states are essentially all we will need, because of the following property.
+\begin{theorem*}
+    A transition element $\bra{\psi}H\ket{\phi}$ with states prepared by $U_\psi\ket{0} = \ket{\psi}$ and $U_\phi\ket{0}=\ket{\phi}$ can be written as a linear combination of inner products
+    \begin{align}
+        \bra{\psi}H\ket{\phi} = \sum_k c_k \bra{\psi}P_k\ket{\phi} = \sum_k c_k \braket{\psi}{\varphi_k}
+    \end{align}
+    The $c_k$ and $P_k$ are the coefficients and Paulistrings that represent the observable $H$ and the states $\ket{\varphi_k}$ are prepared as $U_{k}\ket{0} = \ket{\varphi_k}$ with the circuit $U_{k} = P_kU_\phi$
+\end{theorem*}
+
+
+
+\begin{algo*}[Inner Product Estimation] Inner products between two states prepared from $\ket{0}$ by the circuits $U_\phi$ and $U_\psi$ can be estimated through the ``Hadamard test'' procedure
+\begin{center}
+\begin{quantikz}
+\lstick{$\ket{0}$} & \gate{\hd}  & \octrl{1}  & \ctrl{1}  & \gate{\hd} & \meter{}\\
+\lstick{$\ket{0}$} & \qw & \gate{U_\phi} & \gate{U_\psi} & \qw & \qw
+\end{quantikz}
+\end{center}
+where the ``hollow'' control-dot indicates that we are controlling with $\ket{0}$ instead of the standard $\ket{1}$. 
+The circuit above estimates the real part of the inner product
+\begin{align}
+    \operatorname{Re}\left(\braket{\phi}{\psi} \right) = 2p_0 - 1
+\end{align}
+The imaginary part can be evaluated by adding an $S$ gate to the first qubit wire just before the read-out. 
+\end{algo*}
+
+First remember, that the real-part of a complex number can be written as
+\begin{align}
+    &c = \operatorname{Re}(c) + i\operatorname{Im}(c)\\
+    &\operatorname{Re} = \frac{1}{2}\left(c + c^*\right)
+\end{align}
+which means for our inner product
+\begin{align}
+    \operatorname{Re}\left(\braket{\phi}{\psi}\right) = \frac{1}{2}\left(\braket{\phi}{\psi} + \braket{\psi}{\phi}\right).
+\end{align}
+The circuit $U$ above, prepares the quantum state
+\begin{align}
+    \ket{\Psi} &= U\left(\ket{0}\otimes\ket{\boldsymbol{0}}\right) \\
+    &= \frac{1}{2} \ket{0}\otimes\left(\ket{\phi} + \ket{\psi} \right) + \frac{1}{2} \ket{1}\otimes\left(\ket{\phi} - \ket{\psi} \right).
+\end{align}
+In the following we will derive this result.
+At this point, it is easy to make the mistake of assigning $p_0 = \frac{1}{4}$ -- but this can't be, as this would be independent of the two states $\ket{\phi},\ket{\psi}$, which is obviously wrong. Take $\ket{\psi}=\ket{\phi}$, then we should get $p_0=1$ and not $\frac{1}{4}$. 
+The mistake in the assumption above is, that we forgot about normalization of states. Let's write the states on the right-hand side as two proper states
+\begin{align}
+    \ket{\Psi_\pm} = N_\pm \left(\ket{\phi} \pm \ket{\psi}\right)
+\end{align}
+with the normalization constant $N_\pm$. Now the equation from above looks like
+\begin{align}
+    \ket{\Psi} &= U\left(\ket{0}\otimes\ket{\boldsymbol{0}}\right) \\
+    &= \frac{1}{{2N_+}} \ket{0}\otimes \ket{\Psi_+}+ \frac{1}{{2N_-}} \ket{1}\otimes\ket{\Psi_-},
+\end{align}
+so the probability to read-out $\ket{0}$ in the first qubit is
+\begin{align}
+    p_0 = |\frac{1}{2N_+}|^2 = \frac{1}{4N_+^2}.
+\end{align}
+Now we need to compute this missing factor
+\begin{align}
+    1 &= \braket{\Psi_+}{\Psi_+} = N_+^2 \left(2 + \braket{\phi}{\psi} + \braket{\psi}{\phi}\right) = N_+^2\left( 2 + 2\operatorname{Re}\left(\braket{\phi}{\psi}\right)\right)\nonumber\\
+    &\Leftrightarrow  p_0 = \frac{1}{4N_+^2} = \frac{1}{2} +\frac{1}{2} \operatorname{Re}\left(\braket{\phi}{\psi}\right).
+\end{align}
+By rearranging the above formula we arrive at $\operatorname{Re}\left(\braket{\phi}{\psi}\right) = 2p_0 - 1$.
+The derivation for the imaginary part works in the same way.\\
+
+In some cases, we don't need the inner product between two states, but rather their fidelity
+\begin{def*}[fidelity]
+The fidelity between two states is the absolute square of their inner products
+\begin{align}
+    F(\phi,\psi) = |\braket{\phi}{\psi}|^2.
+\end{align}
+This can be interpreted as the probability that the state $\ket{\phi}$ is observed if the system was in state $\ket{\psi}$.
+\end{def*}
+If we are interested in these quantities, then there are potentially easier ways to obtain them (no controlled $U_\psi$ and $U_\phi$ necessary). The first is the swap test:
+\begin{algo*}[SWAP Test] We can compute the fidelities $|\braket{\phi}{\psi}|^2$ of two quantum states $\ket{\phi}$ and $\ket{\psi}$ with the swap test    
+\begin{center}
+\begin{quantikz}
+\lstick{$\ket{0}$} & \gate{\hd} & \ctrl{2} & \gate{\hd} & \meter{} \\
+\lstick{$\ket{\phi}$} &\qw & \swap{} &\qw  & \qw \\
+\lstick{$\ket{\psi}$} &\qw &\swap{}  &\qw &  \qw
+\end{quantikz}
+\end{center}
+Through repeated measurements the probabilities $p_0$ and $p_1$, of reading out $\ket{0}$ or $\ket{1}$ on the first qubit, can be determined. The squared overlap is then
+\begin{align}
+    |\braket{\phi}{\psi}|^2 = 2p_0 - 1
+\end{align}
+\end{algo*}
+One of the main advantages here, is that we do not need to know the exact preparation procedure of the states (no need to have access to $U_\psi$ ad $U_\phi$). 
+In the circuit description above, there is a controlled-swap operation acting on the 3 ``qubits''. However, these are meant to be qubit registers: the first wire is a single qubit, but the other two wires are as many qubits as the states $\ket{\phi}$ and $\ket{\psi}$ require. The swap operation is then a high-level swap operation that swaps the full states.~\footnote{we can implement this with a series of regular swap gates acting on individual qubits.} 
+The circuit prepares the following state
+\begin{align}
+    U\left(\ket{0}\otimes\ket{\phi}\otimes\ket
+    \psi\right) &= \frac{1}{\sqrt{2}}\left(\ket{+}\otimes\ket{\phi}\otimes\ket
+    {\psi} + \ket{-}\otimes\ket
+    {\psi}\otimes\ket{\phi}\right) \\
+    &= \frac{1}{2}\left(\ket{0}\otimes\left(\ket{\phi}\otimes\ket
+    {\psi} + \ket{\psi}\otimes\ket
+    {\phi}\right) + \ket{1}\otimes\left(\ket{\phi}\otimes\ket
+    {\psi} - \ket{\psi}\otimes\ket
+    {\phi}\right) \right) \nonumber\\
+    &= \frac{1}{2N_+}\ket{0}\otimes\ket{\Psi_+} + \frac{1}{2N_-}\ket{1}\otimes\ket{\Psi_-} \nonumber
+\end{align}
+where we used a similar short-notation as before. 
+The probability to read-out $\ket{0}$ is
+\begin{align}
+    p_0 = \frac{1}{4N_+^2} 
+\end{align}
+and we can compute the normalization factor $N_+$ in a similar spirit as before
+\begin{align}
+    1 &= \braket{\Psi_+}{\Psi_+} = N_+^2 \left(1 + 1 + |\braket{\phi}{\psi}|^2 + |\braket{\psi}{\phi}|^2\right) \nonumber
+    &= N_+^2 \left(2 + 2|\braket{\phi}{\psi}|^2 \right)\\
+    \Leftrightarrow |\braket{\phi}{\psi}|^2 &= \frac{1}{2N_+^2}-1 = 2p_0 - 1.
+\end{align}
+So we have arrived at the result from the box.
+If we have access to the circuits that prepare the two states, a more direct way to compute the fidelity is possible.
+\begin{algo*}[Direct Fidelity Estimation] We can compute the fidelities $|\braket{\phi}{\psi}|^2$ of two quantum states $\ket{\phi}$ and $\ket{\psi}$ directly, if the circuits $U_\psi$ and $U_\phi$ that prepare the states from $\ket{0}$ are known.
+\begin{center}
+\begin{quantikz}
+\lstick{$\ket{0}$} & \gate{U_\phi} & \gate{U^\dagger_\psi}  & \meter{}
+\end{quantikz}
+\end{center}
+Through repeated measurements the probabilities $p_0$ and $p_1$, of reading out $\ket{0}$ or $\ket{1}$ on the first qubit, can be determined. The squared overlap is equivalent to $p_0$
+\begin{align}
+    |\braket{\phi}{\psi}|^2 = p_0
+\end{align}
+\end{algo*}
+The rationale behind this small algorithm is quite straightforward: If we know that $U_\phi$ prepares $\ket{\phi}$ by acting on the initial state $\ket{0}$ and the same for $U_\psi$, then we also know that $U^\dagger_\psi$ will transform the state $\ket{\psi}$ back to $\ket{0}$. If $\ket{\psi}$ and $\ket{\phi}$ are equivalent (up to a phase), then $U^\dagger_\psi$ will map back to a state that is equivalent to $\ket{0}$ (up to a phase). So the read-out probability $p_0$ will be 1. On the other hand, if the two state have nothing in common (if they are orthogonal) then $U^\dagger_\psi$ will map $\ket{\phi}$ to some state that is orthogonal to $\ket{0}$ (since unitaries can not break orthogonality) and we then have $p_0=0$. If the states are neither orthogonal nor equivalent, then we can always write
+\begin{align}
+    \ket{\phi} = N_\psi \ket{\psi} + N_\Psi\ket{\Psi}
+\end{align}
+with $\braket{\phi}{\Psi}=0$. Now $U_\psi^\dagger$ will map the $\ket{\psi}$ part to $\ket{0}$ and it will map $\ket{\Psi}$ to some quantum state $\ket{\varphi}$ with $\braket{\varphi}{0}=0$. Therefore we have
+\begin{align}
+    U^\dagger_\psi\ket{\phi} = N_\psi \ket{0} + N_\Psi\ket{\varphi},
+\end{align}
+so we have $p_0=N_\psi^2$ and
+    $N_\psi = \braket{\psi}{\phi}$, totalling to
+\begin{align}
+ |\braket{\psi}{\phi}|^2 = N_\psi^2 = p_0.
+\end{align}
+
+\subsection{Effective Bases}
+Consider the following scenario: We are given a Hermitian matrix $H$ and want to determine it's lowest eigenvalue. We generate a few trial states (for example with a parametrized quantum circuit) $\left\{\ket{\psi_k}\right\}_1^n$ and evaluate their expectation values $E_k = \bra{\psi_k}H\ket{\psi_k}$, where we pick the lowest value $E_1$. 
+At this point, we at least have the guarantee that $E_1$ is our best approximation to the lowest eigenvalue of $H$ within the expectation values that we so far obtained. 
+But what about linear combinations of the states $\left\{\ket{\psi_k}\right\}_1^n$? 
+Could any of them have a lower expectation value then $E_1$?
+The answer is yes -- just take the simple example $H=X$ and the states $\left\{\ket{0},\ket{1}\right\}$, then the individual expectation values are $E_1=0, E_2=0$ and both equally bad approximations to the lowest eigenvalue which is $-1$. The linear combination $\ket{-} = \frac{1}{\sqrt{2}}\left(\ket{0} - \ket{1}\right)$ is however the exact eigenstate and therefore also has a lower expectation value. In this example the answer to the question is obvious. We will now briefly explore a strategy to find the best linear combination out of a given set of trial states. At first we will assume, that our trial states $\left\{\ket{\psi_k}\right\}_1^n$ are orthogonal: $\braket{\psi_k}{\psi_l}=\delta_{kl}$.
+\begin{algo*}[Effective Basis Diagonalization]
+Given a set of orthonormal trial states $\left\{\ket{\psi_k}\right\}_1^n$ (called the an effective basis) we can find the best linear combination to approximate the lowest eigenvector of $H$ with:
+\begin{enumerate}
+    \item Compute the transition amplitudes: $h_{kl}=\bra{\psi_k}H\ket{\psi_l}$
+    \item Form a $n\times n$ matrix $\mathbf{H}$ with the components $h_{kl}$
+    \item Find the lowest eigenvalue $\lambda$ and eigenvector $\mathbf{c}$ of $\mathbf{H}$
+\end{enumerate}
+The best possible linear combination is then 
+\begin{align}
+    \ket{\Psi} = \sum_{k=1}^n c_k\ket{\psi_k}
+\end{align}
+where $c_k$ are the components of the eigenvector $\mathbf{c}$ and the expectation value $\bra{\Psi}H\ket{\Psi} = \lambda$.
+\end{algo*}
+On first glance this algorithm might raise the alarm, as it sounds like it is just restating the original problem. 
+Take however into account, that the original problem is to find the lowest eigenvalue of the $2^N\times 2^N$ matrix $H$, while the effective basis diagonalization is requires us to find the lowest eigenvalue of the $n\times n$ matrix $\mathbf{H}$.~\footnote{if we chose the standard qubit basis $\left\{\ket{k} \right\}_{k=0}^{2^N-1}$, \textit{i.e.} $n=2^N$ then the algorithm is of course not very helpful. The general assumption is that $n<<2^N$.}
+The trial states 
+
+
+To show that the state $\ket{\Psi}$ indeed has expectation value $\lambda$. For this it will be helpful to write down the eigenvalue equation $\mathbf{H}\mathbf{c} = \lambda \mathbf{c}$ in index form
+\begin{align}
+    \sum_{l}h_{kl}c_l = \lambda c_k.
+\end{align}
+We now start with the simple computation of the expectation value
+\begin{align}
+    \bra{\Psi}H\ket{\Psi} &= \sum_{kl} c^*_k \bra{\psi_l}H\ket{\psi_k} c_l = \sum_{kl}c_k^* h_{kl} c_l \nonumber\\
+    &= \sum_{k} c_k^* \sum_l h_{kl}c_l
+\end{align}
+Now we can plug-in the eigenvalue equation from above and use the normalization 
+\begin{align}
+    \bra{\Psi}H\ket{\Psi} &=\lambda \sum_{k} c_k^* c_k = \lambda \cdot 1 = \lambda.
+\end{align}
+Is $\lambda$ now really better as the lowest expectation value over the trial states?
+Yes -- at least better or equal, since the variational principle also holds for the $n\times n$ matrix $\mathbf{H}$. Here the expectation value w.r.t the vector $c_k = \delta_{1k}$ (all components except the first are zero) is identical to $\bra{\psi_1}H\ket{\psi_1}$.\\
+
+What about non-orthogonal effective bases? If we don't have linear dependencies (if we have, we can remove them), this works the same way, just that the generalized eigenvalue equation for the effective matrix is solved
+\begin{align}
+    \mathbf{H}\mathbf{c} = \lambda \mathbf{S}\mathbf{c}.
+\end{align}
+Here $\mathbf{S}$ is the overlap matrix of the effective basis, with elements $s_{kl} = \braket{\psi_k}{\psi_l}$.
+
+\clearpage
+\subsection{Summary}
+
+A prominent and currently one of the most promising applications is the electronic ground state problem. Here the task is to find the ground state (and ideally also other low-energy eigenstates) of an electronic Hamiltonian -- the observable that describes the energy of electrons bounded in an attractive electrostatic potential. Molecules are such systems, and computing their energies is key to predict and understand chemical reactions.\\
+
+A recipe to tackle this problem with the help of quantum computers is
+\begin{enumerate}
+    \item Discretize the (continuous) electronic Hamiltonian and represent it with Pauli strings~\footnote{if you're interested how this works, see the lecture ``PHM-0291 Quantum Computing'' for M.Sc Physics and M.Sc Computer Science (Wintersemester)}
+    \item Construct a suitable parametrized circuit $U(\theta)$ to approximate the ground state of the discretized Hamiltonian
+    \item Optimize the parameters variationally $\theta^\ast = \arg\min_\theta \bra{\Psi(\theta)}H\ket{\Psi(\theta)}$ with $\ket{\Psi(\theta)} = U(\theta)\ket{0}$.
+    \item Use the optimized state $ \ket{\Psi(\theta^\ast)}$ as initial state for the \texttt{QPE}.
+    \item Collapse into the ground state with high probability
+\end{enumerate}
+
+In the last part we have seen how to compute matrix representations of observables in ``effective'' bases. This methodology allows us to reduce the dimensionality of a ground state problem. 
+Some examples that can be classified as effective basis methods
+\begin{enumerate}
+    \item \texttt{ConfigurationInteraction}: A well established class of methods from classical quantum chemistry. First mean field ``reference state'' is determined, then further basis states are generated from this reference state. The obtained basis states are used to construct an effective matrix that can be diagonalized. 
+    \item \texttt{KrylovSubspace}:~\footnote{if you have taken the B.Sc course: This is the fancy form of the \texttt{PowerIteration}} The effective basis is determined by applying powers of the Hamiltonian to an initial state $\ket{\psi_0}$. The effective basis looks like $\left\{ \mathcal{N}H^k\ket{\psi_0} \right\}_{k=0}^n$ where $\mathcal{N}$ stands for normalization of the states. The procedure to chose the initial state $\ket{\psi_0}$ depends on the application domain and the specific flavour of the Krylov subspace algorithm.  
+\end{enumerate}
+

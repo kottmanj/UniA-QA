@@ -1,0 +1,155 @@
+\section{Quantum Phase Estimation}
+One of the most important quantum algorithms to date is the quantum phase estimation \texttt{QPE}.
+It allows to measure the eigenvalues of unitary matrices
+\begin{align}
+    U \ket{\alpha} = e^{i\alpha} \ket{\alpha}, \;\; \alpha \in \mathbb{R}
+\end{align}
+and by extension also the eigenvalues of Hermitian matrices
+\begin{align}
+       H \ket{\alpha} = \alpha \ket{\alpha}, \;\; \alpha \in \mathbb{R} 
+\end{align}
+through the exponential connection $U=e^{iH}$.~\footnote{In a way the \texttt{QPE} gives an explicit implementation of the quantum mechanical axiom that observables are described through Hermitian matrices, with their eigenvalues being the observable quantities.}\\
+
+As we want to use qubits to ``read-out'' our eigenvalues $\alpha$ we need to make some approximations as real numbers can not be exactly described by a finite sequence of bits.
+For now we will operate under assumption that $\alpha = 2\pi \frac{k}{2^n}$ with integers $n \in \mathbb{N}$ and $0 \leq k < 2^n$, meaning that we assume our eigenvalues can be exactly represented with $n$ bits where $k$ is an integer represented by the bitstring $\mathbf{k}$.
+
+\begin{algo*}[\texttt{QPE}: High-Level Description]\phantom{...}\\
+Given a Hermitian $H$ with eigenstates $\ket{\alpha}$, eigenvalues $\alpha = 2\pi \frac{k}{2^n}$, and $k$ being a integer represented by bitstring $\mathbf{k}$, then
+\texttt{QPE} will act on eigenstates $\ket{\alpha}$ as
+\begin{align}
+    \texttt{QPE} \left(\ket{\mathbf{0}} \otimes \ket{\alpha}\right) = \ket{\mathbf{k}} \otimes \ket{\alpha}.
+\end{align}
+\end{algo*}
+The \texttt{QPE} operates on two qubit registers: one representing the state of interest $\ket{\alpha}$ (the state register) and another auxilliary $n$-qubits (the read-out register).
+
+Measurement of the first qubit register now gives back the information about the phase $\alpha = 2\pi \frac{k}{2^n}$ by providing $k$ in binary. Note that the eigenstate in the second register remains unchanged -- in fact, the form $\ket{\psi} \otimes \ket{\alpha}$, with $\ket{\psi}$ being some state on the first register, remains intact throughout the whole algorithm.\\
+
+In the following we are gonna approach the \texttt{QPE} in a step-by-step approach figuring out how to construct it.
+
+\subsection{Single Qubit Case}
+In the case that $n=1$, the \texttt{QPE} can be implemented as 
+\begin{align}
+    \texttt{QPE} = H(q_1) CU(q_1,q_2) H(q_1) 
+\end{align}
+or as circuit diagram (also indicating where to read-out after the unitaries are executed):
+\begin{center}
+$ \texttt{QPE}$ = \begin{quantikz}
+& \gate{H} & \ctrl{1}& \gate{H} & \meter{} & \\
+& \hphantomgate{} & \gate{U} &  \hphantomgate{} &\qw  
+\end{quantikz}
+\end{center}
+Let's see what this circuit computes when applied to an eigenstate of $U$
+\begin{align}
+    \texttt{QPE}\left(\ket{0}\otimes\ket{\alpha}\right) &= \frac{1}{\sqrt{2}} H(q_1) \left( CU(q_1,q_2) \ket{0}\otimes\ket{\alpha} + CU(q_1,q_2)\ket{1}\otimes\ket{\alpha}\right) \\
+    &= \frac{1}{\sqrt{2}} H(q_1) \left( \ket{0}\otimes\ket{\alpha} + e^{i\alpha}\ket{1}\otimes\ket{\alpha}\right) \\
+    &= \frac{1}{\sqrt{2}} H(q_1) \left( \ket{0} + e^{2\pi i \frac{k}{2} }\ket{1}\right)\otimes\ket{\alpha}\\
+    &= \frac{1}{\sqrt{2}} \left( \ket{+} + e^{2\pi i \frac{k}{2} }\ket{-}\right)\otimes\ket{\alpha}\label{eq:qpe-1qubit}
+\end{align}
+now remember that by our initial assumption, we are only considering matrices $U$ with eigenvalues exactly representable as $\alpha = 2\pi k/2^n$ -- so for $n=1$ we have two possibilities $k=0$ and $k=1$
+\begin{align}
+    \texttt{QPE}\left(\ket{0}\otimes\ket{\alpha}\right) &= \frac{1}{\sqrt{2}} 
+    \begin{cases}
+    \ket{+} + \ket{-} \otimes \ket{\alpha} \text{ for } k=0 \\
+    \ket{+} - \ket{-} \otimes \ket{\alpha} \text{ for } k=1
+    \end{cases}
+\end{align}
+Since we have $1/\sqrt{2}(\ket{+}+\ket{-}) = \ket{0}$ and $1/\sqrt{2}(\ket{+}-\ket{-}) = \ket{1}$, we can summarize as
+\begin{align}
+   \texttt{QPE}\left(\ket{0}\otimes\ket{\alpha}\right) & = \ket{k}\otimes\ket{\alpha}
+\end{align}
+so this is exactly what \texttt{QPE} promised to do.
+
+\subsection{2-Qubit Case}
+In the two-qubit case we are assuming that our phase takes the discrete values 
+\begin{gather}
+    e^{i\alpha} = e^{i2\pi k/4} = \left\{ 1, i, -1, -i \right\} 
+\end{gather}
+for $k=\left\{0,1,2,3\right\}$.
+We are now having the following qubit registers: register $q_1$ consisting of $n=2$ qubits which we will just label as $0$ and $1$ and the second register $q_2$ holding the qubits necessary to represent the state $\ket{\alpha}$. The implementation in this case looks as
+\begin{align}
+    \texttt{QPE} = F(q_1) CU^2(0,q_2) CU(1,q_2) \textsc{H}(0)\textsc{H}(1) 
+\end{align}
+
+where the last operation $F(q_1)$ acts on the first qubit register and is at this point undetermined. 
+As a circuit diagram that looks as
+\begin{center}
+$ \texttt{QPE}$ = \begin{quantikz}
+& \gate{\hd} & \qw      & \ctrl{2}&  \gate[1,2]{F}  & \meter{} &  \\
+& \gate{\hd} & \ctrl{1} & \qw     &  \qw  & \meter{} & \\
+& {/}\qw     & \gate{U} & \gate{U^2}&  \qw  &\qw       &    
+\end{quantikz}
+\end{center}
+
+Let's see how the state looks before $F$ acts. We will label the two qubits in the read-out register as $1$ and $2$ and use the label $q$ for the collection of qubits in the state register
+\begin{align}
+    \texttt{QPE}\left(\ket{0}\otimes\ket
+    {0}\otimes\ket{\alpha}\right) &= F(1,2) CU^2(1,q) CU(1,q) \left(\ket{+}\otimes\ket{+} \otimes \ket{\alpha}\right)\nonumber \\
+    & = \frac{1}{\sqrt{2}}F(1,2) CU^2(0,q_2) \ket{+}\otimes\left( \ket{0} + e^{2\pi i \frac{k}{2} }\ket{1}\right) \otimes \ket{\alpha} \nonumber\\
+    & = \frac{1}{2}F(1,2) \left( \ket{0} + \left(e^{2\pi i \frac{k}{4} }\right)^2\ket{1}\right) \otimes\left( \ket{0} + e^{2\pi i \frac{k}{4} }\ket{1}\right) \otimes \ket{\alpha} \nonumber\\
+    & = \frac{1}{2} F(1,2) \left( \ket{00} +  e^{2\pi i \frac{k}{4} }\ket{01} + e^{2\pi i \frac{2k}{4} }\ket{10} + e^{2\pi i \frac{3k}{4} }\ket{11} \right) \otimes \ket{\alpha}\nonumber \\
+    & \text{let's switch to binary notation on the first register}\nonumber\\
+    & = \frac{1}{2} F(1,2) \left( e^{2\pi i \frac{\mathbf{0}k}{4}}\ket{\mathbf{0}} +  e^{2\pi i \frac{\mathbf{1}k}{4} }\ket{\mathbf{1}} + e^{2\pi i \frac{\mathbf{2}k}{4} }\ket{\mathbf{2}} + e^{2\pi i \frac{\mathbf{3}k}{4} }\ket{\mathbf{3}} \right) \otimes \ket{\alpha} \nonumber\\
+    & = \frac{1}{2} F(0,1) \sum_{l<4}\left( e^{2\pi i \frac{lk}{4}} \ket{l} \right)\otimes\ket{\alpha}.
+\end{align}
+All that is left now is to determine the action of $F$ on the qubits of the read-out register. We want it to act such that
+\begin{align}
+     F(0,1)  \frac{1}{2}\sum_{l<4}\left( e^{2\pi i \frac{lk}{4}} \ket{l}\right) = \ket{k}
+\end{align}
+which is exactly the definition of the discrete Fourier transformation on dimension $N=2^2=4$. In particular here, $F$ should act as the inverse Fourier transformation. If we can define the Fourier transformation \texttt{QFT} on qubits as a unitary operation then $F = \texttt{QFT}^\dagger$. At this point we assume that we have access to \texttt{QFT} and we will see later how to construct it.
+
+\subsection{$N$-Qubit Case}
+Generalizing form the 2-qubit case to the $N$-qubit case is now relatively straightforward. We assume now that our phase can be captured by any of the $2^n$ unit roots $e^{2\pi i \frac{k}{2^n}}$ and implement the \texttt{QPE} as follows.
+\begin{algo*}[\texttt{QPE} (concrete construction)]
+\begin{align}
+\label{eq:general_qpe}
+    \texttt{QPE} = \textsc{QFT}^\dagger(q_1) \left(\prod_{q<n} CU^{2^q}(q,q_2) \textsc{H}(q)\right),
+\end{align}
+or as circuit diagram
+\begin{center}
+$ \texttt{QPE}$ = \begin{quantikz}
+& \gate{\hd} & \qw      & \qw       &\qw &{\cdots}& & \ctrl{4}            & \gate[4]{\texttt{QFT}^\dagger}  & \meter{} &  \\
+& \vdots & & & & & & & & & \\
+& \gate{\hd} & \qw      & \ctrl{2}  &\qw &{\cdots}& & \qw                 &  \qw                                & \meter{} &  \\
+& \gate{\hd} & \ctrl{1} & \qw       &\qw &{\cdots}& &\qw                 &  \qw                                & \meter{} & \\
+& {/}\qw     & \gate{U} & \gate{U^2}&\qw &{\cdots}& &  \gate{U^{2^{n-1}}}      &  \qw                                &\qw       &    
+\end{quantikz}
+\end{center}
+\end{algo*}
+The operation $CU^{2^q}(q,q_2)$ may look expensive, remember however, that we can represent unitaries as
+\begin{align}
+    U(\theta) = e^{-i\frac{\theta}{2} G}
+\end{align}
+with a Hermitian generator $G$. With this we have
+\begin{align}
+    U(\theta)^n = U(n\theta).
+\end{align}
+So $CU^{2^q}(q,q_2)$ does not necessarily mean $2^q$ repetitions of the same primitive operation (however, arbitrary small angles might also come with some computational overhead -- we will however not care about those specifics for now). 
+
+\subsection{Imperfections}
+In general, we will not be able to represent an arbitrary real number $0 \leq \alpha < 2\pi$ with a finite precision $n$ as $\alpha = 2\pi \frac{k}{2^n}$ but have to account for a small error $\epsilon \in \mathbb{R}$ for convenience also represented in units of $2\pi$
+\begin{align}
+    \alpha = 2\pi \frac{k}{2^n} + 2\pi\epsilon.
+\end{align}
+Note, that we can assume $0 \leq |\epsilon| \leq \frac{1}{2^{n+1}}$. Take for example $\epsilon=\frac{1}{2^{n+1}}$, which produces an $\alpha$ whose value exactly between the ones generated with $k$ and $k+1$, so every $\epsilon$ that is larger than $\frac{1}{2^{n+1}}$ should rather be introduced as error for the $\alpha$ value generated by $k+1$.\\
+
+
+With this imperfection in our representation of $\alpha$ we can revisit our derivations from before and estimate~\footnote{we have used $e^{2\pi i \epsilon} \approx 1 + 2\pi i \epsilon$ for small $\epsilon$}
+\begin{align}
+    \texttt{QPE}\ket{0}\otimes\ket{\alpha}
+    &\approx \ket{k}\otimes\ket{\alpha} + 2\pi \epsilon i \ket{\phi} \otimes \ket{\alpha}
+\end{align}
+with $\ket{\phi}$ being and undetermined state.
+From this we can see, that the failure probability is proportional to the square of our error in the binary representation of the phase. In other words, a finite error $\epsilon$ in the binary representation of $\alpha$ leads to a failure probability of the \texttt{QPE} proportional to $\epsilon^2$. Or with respect to the bit-precision $n$ we have a failure probability proportional to $\epsilon^2 \leq \left(\frac{1}{2^{n+1}}\right)^2$\\
+
+Let's go back to the single qubit case. Instead of Eq.~\eqref{eq:qpe-1qubit} we will have
+\begin{align}
+    \texttt{QPE}\ket{0}\otimes\ket{\alpha} &= \frac{1}{\sqrt{2}}\left(\ket{+} + e^{2\pi\left(\frac{k}{2} + \epsilon\right)}\ket{-}\right) \otimes\ket{\alpha}
+\end{align}
+The exact failure probability for the case $k=0$ is then
+\begin{align}
+   \bra{1\alpha}\texttt{QPE}\ket{0\alpha} &=\frac{1}{2} \lvert\braket{1}{+} + e^{2\pi i \epsilon}\braket{1}{-}\rvert^2 \\
+   & = \frac{1}{4} \lvert 1 - e^{2\pi i \epsilon} \rvert^2 \\
+   & = \frac{1}{2}\left(1-\cos\left(2\pi\epsilon\right)\right).
+\end{align}
+As expected, there is no possibility of failure in the algorithm for $\epsilon=0$ while the highest probability of failure is $50\%$ for $\epsilon=\frac{1}{2^{1+1}}=\frac{1}{4}$.
+Note also that $1-cos(x) \approx 1 - 1 + x^2 = x^2$, so this exact failure probability is consistent with our initial estimate of $\epsilon^2$.

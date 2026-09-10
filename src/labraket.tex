@@ -1,0 +1,576 @@
+\section{Linear Algebra \& Braket Notation}
+In the following we will take a quick tour through the basics of linear algebra and focus on the essential concepts that we need for a first contact with quantum algorithmics. 
+This is in no way a proper linear algebra course and we will avoid being super strict with definitions and proofs while on the other hand being more formal than needed to follow the rest of the script.
+To make things interesting, we will directly use the braket notation that is predominantly used in quantum science.
+
+\subsection{Vectors \& Vectorspaces}
+
+As most readers are already familiar with vectors and matrices we start with a very formal definition of vectorspaces
+
+\begin{def*}[Vectorspace]
+A complex vectorspace $\mathcal{V}$ can be axiomatically defined as
+\begin{align*}
+    &\ket{a},\ket{b}\in \mathcal{V}\;\Rightarrow \; \left(\ket{a}+\ket{b}\right) \in \mathcal{V} & & (\text{group action})\\
+    &\exists \ket{e}\in\mathcal{V}, \forall \ket{a}\in\mathcal{V} \;:\; \ket{a} + \ket{e} = \ket{a} & & (\text{neutral element})\\ 
+    &\forall \ket{a} \in \mathcal{V}, \exists \ket{\tilde{a}} \in \mathcal{V}
+: \ket{a} + \ket{\tilde{a}} = \ket{e} & & (\text{inverse element})\\     &(\ket{a} + \ket{b}) + \ket{c} = \ket{a} + (\ket{b} + \ket{c}) & & (\text{associative}) \\
+    &\ket{a}\in \mathcal{V},\; c\in \mathbb{C} \Rightarrow  \left(c\cdot \ket{a} \right)\in \mathcal{V} & & (\text{scalar multiplication})
+\end{align*}
+Note that the first 4 axioms define a ``group'', so a vectorspace is a group with scalar multiplication. This is why, we haven't called the group action ``addition'', although for our purposes the group action will always be addition in the usual sense. For this reason we directly used the symbol ``+'' instead of ``$\odot$'' that is often used to clarify that the group action doesn't need to be ``addition'' in the common sense.
+\end{def*}
+We can also define real vectorspaces, just replace all complex numbers $c\in \mathbb{C}$ with $a\in \mathbb{R}$. This is often formally denoted as $\mathbb{C}$-vectorspace or $\mathbb{R}$-vectorspace. We will mostly stick to the complex variant, but will, from time to time, give some explicit real examples. The first example is the all-time classic, the vectorspace of finite dimensional real vectors
+
+\begin{ex*}[$\mathbb{R}^N$]
+    Vectors $\ket{a}$ of the $N$-dimensional real vectorspace $\mathbb{R}^N$ can be defined as a tuple of $N$ real numbers $a_i$. The group action is elementwise addition. The neutral element $\ket{e}$ is the vector with all components $e_i = 0$. Associativity holds (inherited from associativity of the addition of real numbers). The inverse element of a vector $\ket{a}$ with components $a_i$ is the vector $\ket{\tilde{a}}$ that has components $\tilde{a}_i = -a_i$, we can of course write $\ket{\tilde{a}} = -\ket{a}$. Scalar multiplication $\ket{b} = c\ket{a}$ of a vector $\ket{a}$ with a, in this case, real number $c$, results in the vector $\ket{b}$ with components $b_i = c\cdot  a_i$.
+\end{ex*}
+The complex counterpart also exists
+\begin{ex*}[$\mathbb{C}^N$]
+    Analog to $\mathbb{R}^N$
+\end{ex*}
+Now something different, but a proper $\mathbb{R}$-vectorspace nonetheless, the vectorspace of continuous real functions:
+\begin{ex*}[$C(\Omega)$] The set of continuous real functions $f: \Omega \rightarrow \mathbb{R}$ with (compact) domain $\Omega \subset \mathbb{R}^N$ is a vectorspace. In the following we give the general reasoning as well as explicit examples using the continuous functions $\sin(x)$ and $x^2$ (restricted to the corresponding domain $\Omega\subset \mathbb{R}$)
+\begin{enumerate}
+    \item The group action is addition $h(x) = f(x) + g(x)$. If $f$ and $g$ are continuous, then $h$ is also continuous and $h=f+g$ is still a function of $x$. E.g. $h(x) = \sin(x) + x^2$ is still continuous.
+    \item The neutral element is the constant zero function $e(x) = 0$. A constant function is continuous and the zero function has no effect when added to another function. E.g. $\sin(x) + 0 = \sin(x)$
+    \item The inverse element of $f$ is $-f$. E.g. $\sin(x) + (-\sin(x)) = 0$.\footnote{a common mistake is to assume the inverse element of $f$ is $f^{-1}$ (depending on the used convention the function that gives back the reciprocal values of $f$ or the inverse function of f). But we are looking for the inverse element with respect to the group action, which is, in this case, the addition of functions.}
+    \item Scalar multiplication is just the scaled function. E.g. $h(x) = c\sin(x)$ is still a continuous function.
+\end{enumerate}
+\end{ex*}
+In the same sense: Multivariate continuous real functions $f: \mathbb{R}^N \rightarrow \mathbb{R}$, continuous complex functions $f: \mathbb{R} \rightarrow \mathbb{C}$, smooth functions, or other function spaces that are vector spaces exist. 
+We can of course also define our $N$-dimensional real vectors in $\mathbb{R}^N$ as functions of integers $I \subset \mathbb{N}_0$ with $|I|=N$ such that $f: I \rightarrow \mathbb{R}$. This gives us a function with $|I|=N$ possible inputs that map to real numbers -- instead of writing $f_i$ for the components we write $f(i)$ (it's of course the same thing).
+
+\subsection{Inner Products \& More}
+With inner products (synonyms: scalar product, dot product) we can give our vector space more structure. An inner product between two vectrors $\ket{a},\ket{b}$ basically computes ``how much of $\ket{b}$ is contained in $\ket{a}$'' or vice versa. In other words we try to come up with an operation that answers the question: ``can we write $\ket{b}$ as $\ket{b} = c\ket{a} + \dots$ with $c$ being a number. The inner product is essentially computing this number $c$ (so if $c=0$ then $\ket{a}$ is not contained in $\ket{b}$)~\footnote{implicitly we are assuming here that all our vectors are normalized (see later in the script) and that whatever comes after the $\dots$ does not contain $\ket{a}$ anymore}
+It turns out, that you can define an inner product axiomatically as:
+\begin{def*}[inner product]
+    An inner product between two vectors $\ket{a},\ket{b}\in\mathcal{V}$ is a function $\braket{\cdot}{\cdot}: \mathcal{V}\times\mathcal{V} \rightarrow \mathbb{C}$ that is
+    \begin{enumerate}
+        \item Linear in the second argument
+        \begin{align*}
+            \ket{b}=c\ket{x}+d\ket{y}\;\Rightarrow\; \braket{a}{b} = c\braket{a}{x} + d\braket{a}{y} 
+        \end{align*}
+        \item Semi-linear in the first argument
+        \begin{align*}
+            \ket{a}=c\ket{x}+d\ket{y}\;\Rightarrow\; \braket{a}{b} = c^*\braket{x}{b} + d^*\braket{y}{b} 
+        \end{align*}
+        \item Hermitian
+        \begin{align*}
+            \braket{a}{b} = \braket{b}{a}^*
+        \end{align*}
+        \item Positive definite
+        \begin{align*}
+            &\braket{e}{e} = 0\\
+            &\ket{a}\neq \ket{e} \Rightarrow \braket{a}{a} > 0 
+        \end{align*}
+        with $\ket{e}$ being the neutral element of $\mathcal{V}$
+    \end{enumerate}
+\end{def*}
+The notation might seem a bit odd in the beginning, i.e. why are we not writing $f(\ket{a},\ket{b})$, or high-school style $\ket{a}\cdot \ket{b}$, but instead write $\braket{a}{b}$ for the inner product. The later notation, the ``braket'', has advantages: First, we always see directly that this is an inner product. Second, due to the compactness of the notation, we can often avoid having to replace it with another symbol representing the complex number that the inner product computes. Third, complex conjugation is easy (through Hermiticity), i.e. if $c=\braket{a}{b}$ then $c^* = \braket{b}{a}$. We will soon also be able to define the object $\bra{a}$. But first, we will see some examples.
+The standard example is the inner product of real vectors in $\mathbb{R}^N$ which we all know from highschool
+\begin{ex*}[$\mathbb{R}^N$ inner product] An inner product between two  vectors $\ket{a},\ket{b} \in \mathbb{R}^N$ can be defined as
+\begin{align*}
+    \braket{a}{b} = \sum_{k=1}^N a_k b_k
+\end{align*}
+where $a_k$ and $b_k$ are the components of the two vectors.
+\end{ex*}
+We can quickly convince ourselves that the 4 axioms for inner products indeed hold here. Note here, that in $\mathbb{R}^N$ everything is real, so the semi-linearity in the first argument becomes just plain linerarity (no complex conjugates) and in the same way, we can just drop the complex conjugation in axiom 3 (Hermicity).
+The neutral element of $\mathbb{R}^N$ is the vector with all components equal to zero. Of course the inner product of this vector with itself will evaluate to zero. At the same time, the inner product of itself can not become zero if at least one component is not equal to zero. Inner products of such vectors with itself will also always be positive (since we will sum up the squares of the components).\\
+We can now think about the complex version of this vectorspace, the $\mathbb{C}^N$, and find an appropriate inner product.
+The intuitive approach is to just use the same inner product as for $\mathbb{R}^N$, but when checking if the axioms hold, we will encounter problems: semi-linearity, Hermiticity and even positive definiteness are not fulfilled anymore. 
+A simple fix for the semi-linearity comes to mind: just replace the components of the first argument (the $a_k$ in the formula above) with their corresponding complex conjugates. This obviously fixes the semi-linearity axiom, but on further inspection also fixes the other axioms. 
+\begin{ex*}[$\mathbb{C}^N$ inner product] An inner product between two  vectors $\ket{a},\ket{b} \in \mathbb{C}^N$ can be defined as
+\begin{align*}
+    \braket{a}{b} = \sum_{k=1}^N a_k^\ast b_k
+\end{align*}
+where $a_k$ and $b_k$ are the components of the two vectors.
+\end{ex*}
+To add some more examples, we go back to the space of continuous real function $C(\Omega)$ and find an inner product for it. 
+Our first attempt is again to take the inner product on $\mathbb{R}^N$ and adapt it accordingly. 
+First we need to figure out what the components of a vector in $C(\Omega)$ are. 
+The vectors themselves are functions $f(x)$ of a real variable $x$ that map to real numbers. 
+By using a different notation $f_x\equiv f(x)$ this already looks like a component of a usual vector. 
+The difference is just that we now have infinitely many and the ``index'' $x$ is a continuous variable.
+However, having sums over a continuous index is not uncommon, it's so common that it got a special symbol and is now called an integral. With this we have figured out an appropriate inner product for $C(\Omega)$ (and for most other function spaces of real functions as well)
+\begin{ex*}[$C(\Omega)$ inner product] An inner product for continuous real functions $f,g\in C(\Omega)$ can be defined as
+\begin{align*}
+    \braket{f}{g} = \int_\Omega f(x)g(x) \operatorname{d}x.
+\end{align*}
+In the same manner, we can define an inner product for continuous complex functions $f:\Omega \rightarrow \mathbb{C}$ (and analogue $g$) as
+\begin{align*}
+    \braket{f}{g} = \int_\Omega f(x)^*g(x) \operatorname{d}x.
+\end{align*}
+\end{ex*}
+If you have wondered, why we have restricted the domains  $\Omega\subset \mathbb{R}$ and did not allow $\Omega=\mathbb{R}$, it was that we will have an easier time with examples like the one above (no diverging integrals, and therefore finite inner products).
+Now that we know what an inner product is, we quickly repeat other structural elements that can be defined on vector spaces. 
+The first is the norm of a vector, in the typical (Euclidian) sense this is the length of the vector.
+Similar to the inner product, the norm can also be defined axiomatically
+\begin{def*}[norm] The norm of a vector $\ket{a}\in\mathcal{V}$ can be defined as a function $\| \ket{a} \| : \mathcal{V} \rightarrow \mathbb{R}$ that fulfills
+\begin{enumerate}
+    \item Positive definite: $\|\ket{e}\| = 0,\; \|\ket{a}\|>0,\; \ket{a}\neq \ket{e}$
+    \item Absolute homogeneous: $\ket{b} = c\ket{a}\Rightarrow \|\ket{b}\| = |c|\cdot\|\ket{a}\|$
+    \item Triangular inequality: $\| c\ket{x}+ d\ket{y}\| \leq |c|\cdot\|\ket{x} \| + |d|\cdot\| \ket{y} \| $
+\end{enumerate}
+\end{def*}
+A convenient property of inner products is that they always ``induce'' a norm. So if we already have an inner product, we have a canonical norm that follows from it.
+A prominent example is the so-called $2$-norm, that is induces by the inner products above
+\begin{def*}[2-norm] The 2-norm for $\mathbb{R}^N$, $\mathbb{C}^N$, and $C(\Omega)$, $C(\mathbb{C})$ and other function spaces, is the induced norm given by
+\begin{align*}
+    \|\ket{a}\|_2 := \sqrt{\braket{a}{a}}.
+\end{align*}
+\end{def*}
+The subscript $2$ is often dropped in the notation as this can be viewed as the default norm in those spaces, so if you encounter the a $\| x\| $ in the literature it usually refers to the $2$-norm of the vector $x$ (often we also just write $\|x \|$ instead of $\|\ket{x} \|$). 
+To give a more complete picture, we will now also show an example of 
+a proper norm that is not the 2-norm. If there is a 2-norm, there is probably also a 1-norm, let's try to see what it is. First we take a look at how the 2-norm is computed for $\mathbb{C}^N$
+\begin{align}
+    \| \ket{a} \|_2 = \sqrt{\braket{a}{a}} = \left(\sum_{k=1}^N |a_k|^2\right)^{\frac{1}{2}}, \quad \ket{a}\in\mathbb{C}^N,
+\end{align}
+where $|a_k|^2$ is the squared absolute value of the complex number $a_k$.~\footnote{for complex numbers $c=a + ib$ the squared absolute value is $|c|^2 = a^2 + b^2 = c^* \cdot c$}
+The 2 in the 2-norm comes form the square, so the 1-norm is just the sum of all absolute values
+\begin{align}
+    \| \ket{a} \|_2 = \sum_{k=1}^N |a_k|, \quad \ket{a}\in\mathbb{C}^N,
+\end{align}
+In general we can define a $p$-norm with finite $p\geq 1 $ as
+\begin{align}
+    \| \ket{a} \|_p = \left(\sum_{k=1}^N |a_k|^p\right)^{\frac{1}{p}}, \quad \ket{a}\in\mathbb{C}^N.
+\end{align}
+All of these norms fulfill the axioms for norms stated above, but note however that the $p=2$ is the only norm that is induced by an inner product (for the others you can not define one that induces them).\\
+In the same way as inner products induce norms, norms induce metrics -- a quantification of distance between two vectors. The induces metric $d_2$ of 2-norms is the norm of the difference between two vectors 
+\begin{align*}
+    d_2(\ket{a}, \ket{b}) = \| \ket{a} - \ket{b} \|_2,
+\end{align*}
+which is also our intuitive notion of differences between vectors imagined as arrows. Note that metrics can also be defined axiomatically, but we won't bother with it here.\\
+
+Through the notion of norms and metrics (lengths and distances) we are now able to give an intuitive explanation for the various complex conjugations that appear in the definition of the inner product above. Those might appear strange on first encounter, but they make perfect sense.
+Consider the distance $d_2(a,b)$ of two vectors $\ket{a}$,$\ket{b}$ which is just induced by the norm $d_2(a,b) = \|\ket{a}-\ket{b} \|$ that is itself induced from the inner product. 
+Since the norm is positive definite (the length of a vector is only zero if the vector is the neutral element w.r.t addition -- i.e. the vector with all components set to zero, or ``zero-vector'') this also is inherited from the metric: The distance $d_2(a,b)$ is only zero if the difference of the two vectors is the zero-vector. This can however only happen if $\ket{a}=\ket{b}$.
+In other words, if the distance between two vectors is zero, then the two vectors have to be the same. 
+This is intuitive! 
+If the inner product is however not positive definite, the consequence for the induced norms and metrics would be that there could be vectors with zero length that are not the zero vectors, and there could be pairs of distinct vectors with zero distance. 
+This is a scenario that we want to avoid. 
+If we now go back to the semi-linearity and hermiticity axioms for the inner product, we see that these are the properties that allow inner products of a vector with itself to always be a real number and always be positive definite. 
+
+\subsection{Orthogonality}
+The inner product $\braket{a}{b}$ of two vectors is proportional to how much of vector $\ket{a}$ is already contained in vector $\ket{b}$. If $\ket{a}$ is normalized, i.e. $\|\ket{a}\|_2=1$, the inner product is not just proportional but exactly determines the coefficient $c_a$ in the equation $\ket{b} = c_a\ket{a} + c_r\ket{r}$, where $\ket{r}$ is, for convenience, a normalized vector and $c_r$ some scaling factor.
+In order for the equation to make sense, the vector $\ket{r}$ should also not contain the vector $\ket{a}$, i.e. we want
+\begin{align}
+    \bra{a}\ket{b} = c_a \bra{a}\ket{a} + c_r \bra{a}\ket{r} = c_a
+\end{align}
+so we require
+\begin{align}
+    \bra{a}\ket{r} = 0.
+\end{align}
+The vector $\ket{r}$ is said to be orthogonal to $\ket{a}$.
+\begin{def*}[orthonormality] A set of vectors $\left\{\ket{x_k}\right\}_{k=1}^{N}$ is said to be mutually orthonormal (orthogonal and normalized) if the following holds for the inner products
+\begin{align*}
+    \bra{x_k}\ket{x_l} = \delta_{kl} \equiv \begin{cases}
+        1 ,& k=l\\
+        0 ,& k\neq l
+    \end{cases}
+\end{align*}
+\end{def*}
+\begin{def*}[standard basis] The standard basis vectors for $\mathbb{C}^N$ are the vectors
+\begin{align*}
+    \ket{1} = 
+    \begin{pmatrix}
+        1 \\ 0 \\ 0 \\ \vdots \\ 0
+    \end{pmatrix},\;    \ket{2}= \begin{pmatrix}
+        0 \\ 1 \\ 0 \\ \vdots \\ 0
+    \end{pmatrix},\; \ket{3}=     \begin{pmatrix}
+        0 \\ 0 \\ 1 \\ \vdots \\ 0
+    \end{pmatrix},\dots, \;\ket{N}=    \begin{pmatrix}
+        0 \\ 0 \\ 0 \\ \vdots \\ 1
+    \end{pmatrix}.
+\end{align*}
+The components of the $k$th basis vector $\ket{k}$ are $\delta_{ik}$. Forming the inner product with an arbitrary vector in $\mathbb{C}^N$ with the $k$th basis vector gives back the $k$th component of this vector: $\braket{k}{a} = a_k$. We can express any vector as a linear combination of the standard basis vectors
+\begin{align*}
+    \ket{a} = \sum_{k=1}^N a_k \ket{k}
+\end{align*}
+\end{def*}
+In the main lecture we will often enumerate the standard basis vectors from $0$ to $N-1$ (which becomes more convenient for qubits), apart from that they are the same vectors.
+If there is a standard basis, there have to be non-standard bases.
+As it turns out, we can take any set of mutually orthonormal vectors as a basis for $\mathbb{C}^N$.
+\begin{def*}[basis] Any set of mutually orthonormal vectors $\left\{ \ket{x_k}\right\}_{k=1}^N$ forms a basis for $\mathbb{C}^N$. Meaning that every vector $\ket{a}\in\mathbb{C}^N$ can be written as
+\begin{align*}
+    \ket{a} = \sum_{k=1}^N {a}^{(x)}_k \ket{x_k}
+\end{align*}
+and the numbers $a^{(x)}_k$ are the components in this basis (the $^{(x)}$ was added to indicate this, but is not standard notation).
+\end{def*}
+
+\subsection{Inner Products as Operators}
+In the following we will define an operator for the inner product. That is, we are building an operator $O(\ket{a}): \mathbb{C}^N \rightarrow \mathbb{C}$ based on a given vector $\ket{a}\in\mathbb{C}^N$ with the task ``form the inner product with the next vector that you will encounter from the left''. 
+In other words, the operator is supposed to act, on an arbitrary vector $\ket{b}\in \mathbb{C}^N$ as
+\begin{align}
+    O(\ket{a}) \ket{b} = \braket{a}{b}.
+\end{align}
+A convenient notation for such inner product operators (sometimes called linear functionals) is
+\begin{align}
+    O(\ket{a}) \equiv \bra{a}
+\end{align}
+this dates back to Paul Dirac, who called the operators $\bra{a}$ ``bra'' and the vectors $\ket{b}$ ``ket'', if the bra acts on the ket, it forms a braket~\footnote{proper english ``bracket'' (German: Klammer) but ``cket'' would be inconvenient as a standalone word, so the word braket became its own thing.} $\braket{a}{b}$.
+\begin{def*}[bra] For every vector $\ket{a}\in\mathbb{C}^N$ (called ket) we can create a linear operator $\bra{a}$ (called bra) that acts on arbitrary $\ket{b}\in\mathbb{C}^N$ by forming the inner product with $\ket{a}$
+\begin{align*}
+    \bra{a}\left(\ket{b}\right) = \braket{a}{b}.
+\end{align*}
+If we represent the ket $\ket{a}$ as column vector
+\begin{align*}
+    \ket{a} \equiv \begin{pmatrix}
+        a_1\\a_2\\a_3\\\vdots\\a_N
+    \end{pmatrix}
+\end{align*}
+the corresponding representation of $\bra{a}$ would be the complex conjugated row-vector
+\begin{align*}
+    \bra{a} \equiv \begin{pmatrix}
+        a_1^*&a_2^*&a_3^*&\dots&a_N^*
+    \end{pmatrix}
+\end{align*}   
+\end{def*}
+A useful operation that we will often need is the so called dagger.
+\begin{def*}[dagger] The dagger $\dagger$ converts the ket to the bra and vice versa
+\begin{align*}
+    \ket{a}^\dagger = \bra{a},\quad \bra{a}^\dagger = \ket{a}
+\end{align*}
+For an explicit vector the dagger converts row to column and vice versa while simultaneously taking the complex conjugate of all components.
+\end{def*}
+
+Although we have introduced the bra $\bra{a}$ as an operator, we can also identify it as a vector. For vector spaces like $\mathbb{R}^N$ or $\mathbb{C}^N$ it turns out that the vectorspace formed by all the bra vectors (the dual space) is isomorphic to the original vectorspace.
+In general, the dual space for a complex vectorspace is the space of all linear functionals $f: \mathcal{V} \rightarrow \mathbb{C}$, for endless vectorspaces like $\mathbb{C}^N$ the dual space is isomorphic to (and usually identified as) $\mathbb{C}^N$, this is however not necessarily the case for function spaces like $C(\Omega)$.
+We can of course still build bra-functions of continous functions, e.g. if $\ket{f}\in C(\Omega)$ we can build the functional $\bra{f}$ that acts on other $\ket{g}\in C(\Omega)$ as
+\begin{align*}
+    \braket{f}{g} = \int_\Omega f^*(x) g(x) \operatorname{d}x
+\end{align*}
+but the space of linear functionals on $C(\Omega)$ contains more functionals than those bra elements.
+You can for example take a window function, or a step function (which is obviously not continuous) and still get a valid functional for all continuous functions. 
+\subsection{Matrices}
+In the previous section we have encountered the ``bra elements'' of a vectorspace and scratched on the surface why things become more complicated for infinite dimensional vectorspaces. 
+In the main part of the course, we will deal mostly with quantum states on a finite number of qubits, therefore we will only need exponentially large, but still finite dimensional vectorspaces $\mathbb{C}^N$, so these issues won't bother us much. 
+We will now construct more advanced linear operators and end up with the good old matrices.\\
+
+We have seen that a bra-vector $\bra{a}$ is essentially a linear functional with the instruction ``form the inner product with the next vector to your right''.
+The inner product itself is then written as the braket $\braket{a}{b}$.
+If there is a braket, you might wonder if we can also have a ketbra $\ket{a}\bra{b}$, and indeed there is. 
+The object $\ket{a}\bra{b}$ is a linear operator that takes a vector, say $\ket{c}$ and performs the following operations: compute the inner product between the input vector $\ket{c}$ and $\bra{b}$: $\braket{b}{c}$ then return the vector $\ket{a}$ scaled by the complex number you computed through the inner product. 
+\begin{def*}[ketbra] The ketbra $\ket{a}\bra{b}$ formed from ket and bra vectors $\ket{a}\in\mathbb{C}^N$ and $\bra{b}^\dagger\in\mathbb{C}^M$ is an operator $\ket{\cdot}\bra{\cdot}:\mathbb{C}^M \rightarrow \mathbb{C}^N$. It always returns the vector $c\ket{a}$ where $c$ is a complex number (scaling factor) that is computed as the braket of $\bra{b}$ and the input vector. On a general vector $\ket{c}\in\mathbb{C}^N$ it acts as
+\begin{align*}
+    \left(\ket{a}\bra{b}\right)\ket{c} = \ket{a}\braket{b}{c}
+\end{align*}
+\end{def*}
+Note that these ketbra operators can in principle map between two different vectorspaces, we will however almost always use them between the same vectorspaces (so $M=N$ in almost all cases). If different vectprspaces are involved, it usually makes sense to somehow clarify this in the notation. In the following we will, if not explicitly mentioned otherwise, always assume that the individual vectors that form the ketbra have the same dimension.\\
+
+\begin{def*}[projector]
+    An operator $X$ is a projector when it is idempotent
+    \begin{align*}
+        X^2 = X
+    \end{align*}
+    and therefore $X^n = X$ for any $n>0$.
+\end{def*}
+
+\begin{theorem*}
+    The ketbra $\ket{a}\bra{a}$ formed from an arbitrary vector $\ket{a}\in\mathbb{C}^N$ is a projector, as long as $\ket{a}$ is normalized.
+\end{theorem*}
+
+\begin{theorem*}
+    A linear combination of ketbra-projectors 
+    \begin{align*}
+        P = \sum_{k}\ket{x_k}\bra{x_k}
+    \end{align*}
+    is itself a projector, if the vectors $\left\{ \ket{x_k}\right\}$ are an orthonormal set.
+\end{theorem*}
+
+\begin{theorem*}[resolution of the identity]
+    If we take a basis $\left\{ x_k \right\}_{k=1}^N$ of $\mathbb{C}^N$ and construct the projectors $\left\{ \ket{x_k}\bra{x_k}\right\}_{k=1}^N$, they sum up to the identity operation
+    \begin{align*}
+        \sum_{k=1}^N \ket{x_k}\bra{x_k} = 1.
+    \end{align*}
+\end{theorem*}
+The resolution of the identity often comes in handy since we can always insert unit operations into our equations and then expand those into convenient bases.\\
+
+At this point we will have a brief callback to the standard basis in $\mathbb{C}^N$, which was denoted as $\left\{\ket{k}\right\}_{k=1}^N$ (see the chapter on orthogonality). 
+Consider now a second set of arbitrary vectors $\left\{\ket{a_k}\right\}_{k}^N$ that don't necessarily have to be orthonormal and form the operator
+\begin{align*}
+    A = \sum_{k=1}^N \ket{k}\bra{a_k}.
+\end{align*}
+What isthe action that $A$ performs in words? We can describe it as an operator that acts on an input vector $\ket{f}$ as: `` for each $k$ do the following: compute the inner product of $\bra{a_k}\ket{f}$ and make this the $k$th component of the output vector''.
+Or in other words:
+\begin{align}
+    \ket{f} \xrightarrow[]{A} \begin{pmatrix}
+        \bra{a_1}\ket{f} \\ \bra{a_2}\ket{f} \\ \vdots \\ \bra{a_N}\ket{f}
+    \end{pmatrix}.
+\end{align}
+We can therefore just represent the operator as the collection of row-vectors $\bra{a_k}$ in order and remember that the instruction is to perform the inner products accordingly 
+\begin{align}
+    \begin{pmatrix}
+       \bra{a_1}\\ \bra{a_2} \\ \vdots \\ \bra{a_N}
+    \end{pmatrix} = \begin{pmatrix}
+        (a_1)_1^* & (a_1)_2^* & \dots & (a_1)_N^* \\
+        (a_2)_1^* & (a_2)_2^* & \dots & (a_2)_N^* \\
+        \vdots & \dots & \ddots & \\
+        (a_N)_1^* & (a_N)_2^* & \dots & (a_N)_N^* \\
+    \end{pmatrix}
+\end{align}
+this familiar representation of the linear operator is called matrix, and the numbers $(a_k)_l^\ast \equiv a_{kl}^\ast$ the matrix elements.~\footnote{if the complex conjugation seems weird: this is just because we have defined the operator $\ket{k}\bra{a}$ over the ket vector $\ket{a}$, so the components of $\bra{a}$ are the complex conjugated components of $\ket{a}$.}\\
+
+To arrive at the same expression, we can use the resolution of the identity with the standard basis:
+\begin{align}
+    A &= \sum_{k=1}^N \ket{k}\bra{a_k} 1 \\
+    &= \sum_{k=1}^N \ket{k}\bra{a_k} \sum_{l=1}^N\ket{l}\bra{l} \\
+    &= \sum_{k,l=1}^N \ket{k} \bra{a_k} \ket{l}\bra{l}\\
+    &= \sum_{k,l=1}^N m_{kl} \ket{k}\bra{l}
+\end{align}
+now the numbers $m_{kl}$ are the matrix components.
+Note that we can write any matrix like the last line above. 
+In this example: $m_{kl} = \bra{a_k}\ket{l} = (a_k)_l^\ast$ since by Hermiticity of the inner product $\bra{a_k}\ket{l} = \bra{l}\ket{a_k}^*$ and $\bra{l}\ket{a_k}$ gives back the $l$th component of the vector $\ket{a}$.
+Of course we could have also used another basis instead of the standard basis and arrive at a similar expression.
+
+\begin{def*}[matrix representation]
+    Given any operator $A$ on a vectorspace and a set of orthonormal vectors $\left\{\ket{x_i}\right\}_{k=1}^M$, the operator
+    \begin{align*}
+        \tilde{A} &= \left(\sum_{k=1}^M \ket{x_k}\bra{x_k}\right) A \left(\sum_{l=1}^M \ket{x_l}\bra{x_l}\right) \\
+        &= \sum_{kl} \left(\bra{x_k}A\ket{x_l}\right) \ket{x_k} \bra{x_l}\\
+        &= \sum_{kl} a_{kl} \ket{x_k} \bra{x_l}
+    \end{align*}
+    is the original operator $A$ projected to the vectorspace $\mathcal{V}_x= \text{span} \left(\left\{\ket{x_i}\right\}_{k=1}^M\right)$. We call $a_{kl}$ the matrix representation of $\tilde{A}$.
+\end{def*}
+
+In the following we will give some examples for matrix representations
+\begin{ex*}[$X$ matrix] The Pauli-X matrix is a matrix on $\mathbb{C}^N$ with matrix elements
+\begin{align*}
+    X \equiv \begin{pmatrix}
+        0 & 1\\ 1 & 0
+    \end{pmatrix}
+\end{align*}
+in ketbra form this equates to
+\begin{align*}
+    X = \ket{1}\bra{2} + \ket{2}\bra{1}.
+\end{align*}
+We will now compute the matrix representation of $X$ in a different basis, the $\pm$ basis defined as
+\begin{align*}
+    \ket{\pm} = \frac{1}{\sqrt{2}}\left(\ket{1} \pm \ket{2}\right).
+\end{align*}
+We arrive at the matrix representation by inserting the resolution of the identiy in the $\pm$ basis from the left and the right
+\begin{align*}
+    X &= 1 X 1 = \left(\ket{+}\bra{+}X\ket{+}\bra{+}\right) + \left(\ket{+}\bra{+}X\ket{-}\bra{-}\right) + \dots \\
+    & = \ket{+}\bra{+} - \ket{-}\bra{-}
+\end{align*}
+so the matrix elements of the $X$ operation in the $\pm$ basis are
+\begin{align*}
+    X^{(\pm)} = \begin{pmatrix}
+        \bra{+}X\ket{+} & \bra{+}X\ket{-}\\
+        \bra{-}X\ket{+} & \bra{-}X\ket{-}
+    \end{pmatrix}=\begin{pmatrix}1 & 0 \\ 0 & -1\end{pmatrix}
+\end{align*}
+
+\end{ex*}
+The explicit steps in the equations above are left out. Try them yourself as an exercise. Use (and understand) the following
+\begin{align}
+    \bra{+}X\ket{+} &= \bra{+}\left(\ket{1}\bra{2} + \ket{2}\bra{1}\right)\ket{+} \\
+    &= \frac{1}{2}\left(\bra{1} + \bra{2}\right)\left(\ket{1}\bra{2} + \ket{2}\bra{1}\right)\left(\ket{1} + \ket{2}\right) = 1
+\end{align}
+and so on.
+An alternative way to derive the result is to represent $\ket{1}$ and $\ket{2}$ as linear combinations of $\ket{+}$ and $\ket{-}$ and plug that into the definition of $X$.\\
+
+In the previous section, we have introduced the dagger operation that converts ket to bra vectors. Since a matrix $M$ applied to a (ket) vector $\ket{a}$ is again a (ket) vector $\ket{b} = M\ket{a}$.
+Now we can form the bra element $\bra{b}$ and ask which relation $\bra{b}$ ad $\bra{a}$ have, given that we know the relation of their corresponding ket elements. We are looking for the matrix $V$ that gives us $\bra{b} = \bra{a}V$ (note that $\bra{a}V$ is still an operator that "takes" a vector from the right and converts it into a complex number). It seems obvious that $V$ has to have something to do with $M$, so we call $V$ the ``daggered'' matrix of $M$ and write $V=M^\dagger$ or just $\bra{b} = \bra{a}M^\dagger$.
+
+\begin{def*}[dagger on matrices]
+Let $M$ be a matrix with elements $m_{kl}$. Then $M^\dagger$ is the matrix with elements $\tilde{m}_{kl} = m_{lk}^*$. So the dagger operation is the transposed matrix with all elements complex conjugated $M^\dagger = \left(M^T\right)^*$.\\
+
+The dagger operation acts on a product of matrices as
+\begin{align*}
+    M = ABC, \quad M^\dagger = C^\dagger B^\dagger A^\dagger
+\end{align*}
+\end{def*}
+
+\subsection{Hermitian and Unitary Matrices}
+\begin{def*}[Hermitian matrix]
+A matrix $H$ is Hermitian if
+\begin{align*}
+    H^\dagger = H.
+\end{align*}
+If $H$ only contains real numbers $H^\dagger = H^T = H$ which is sometimes referred to as a symmetric matrix.
+\end{def*}
+\begin{def*}[unitary matrix] A matrix $U$ is unitary if
+\begin{align*}
+    U^\dagger U = U U^\dagger = 1
+\end{align*}
+or in other words $U^\dagger = U^{-1}$.
+If $U$ has only real elements, then we have $U^\dagger = U^T = U^{-1}$ and the matrix sometimes called ``orthogonal'' instead of unitary.
+\end{def*}
+\begin{theorem*}[basis change]
+    The operator
+    \begin{align*}
+        U = \sum_{k=1}^{N} \ket{x_k}\bra{y_k}
+    \end{align*}
+    is unitary if $\left\{\ket{x_k}\right\}_{k=1}^{N}$ and $\left\{\ket{y_k}\right\}_{k=1}^{N}$ are each orthonormal sets of functions
+\end{theorem*}
+Proof by computation:
+\begin{align*}
+    U^\dagger U &= \sum_{l=1}^{N} \ket{y_l}\bra{x_l} \sum_{k=1}^{N} \ket{x_k}\bra{y_k} \nonumber\\
+    &= \sum_{k,l=1}^N \ket{y_l} \braket{x_l}{x_k}\bra{y_k} \nonumber\\
+    &= \sum_{k,l=1}^N \delta_{kl}\ket{y_l}\bra{y_k} = \sum_{k = 1}^N \ket{y_k}\bra{y_l} = 1
+\end{align*}
+where we have used the resolution of the identity and the fact that each set of $N$ orthonormal vectors is a basis of $\mathbb{C}^N$. Of course we would get the same result for $U U^\dagger$.
+
+\subsection{Eigensystems}
+
+\begin{def*}[eigensystem]
+An eigensystem of a matrix $M$ is a collection of (normalized) vectors $\ket{v_k}$ and values $v_k \in \mathbb{C}$ for which the eigenvalue equation
+\begin{align*}
+    M \ket{v_k} = v_k \ket{v_k}
+\end{align*}
+holds. The values $v_k$ are called eigenvalues, and the vectors $\ket{v_k}$ eigenvectors of $M$.
+\end{def*}
+
+\begin{theorem*}[hermitian eigensystems]
+Eigensystems of Hermitian matrices always have real eigenvalues and the eigenvectors are mutually orthogonal. The eivenvectors of a $N\times N$ Hermitian matrix are a basis for $\mathbb{C}^N$.
+The Hermitian matrix $H$ can be represented as 
+\begin{align*}
+    H = \sum_{k=1}^N v_k \ket{v_k}\bra{v_k}
+\end{align*}
+where $\left\{\ket{v_k}, v_k\right\}_{k=1}^{N}$ eare the eigenvectors and eivenvalues of $H$.
+\end{theorem*}
+Note that in the example in the previous section (Pauli-X matrix) the $\ket{\pm}$ vectors are the eigenvectors of $X$ with eigenvalues $\pm 1$. 
+
+\begin{def*}[Generator]
+A Hermitian matrix $G$ can generate a unitary matrix
+\begin{align*}
+    U = e^{iG}
+\end{align*}
+and $G$ is called the generator of $U$. Here the matrix-exponential can be defined via the series expansion of the exponential function
+\begin{align*}
+    e^{A} = \sum_{k=0}^\infty \frac{A^k}{k!}
+\end{align*}
+\end{def*}
+
+\begin{theorem*}[unitary eigensystems]
+Eigensystems of unitary matrices always have eigenvalues on the complex unit sphere (i.e. they have the form $e^{i\varphi}$ with $\varphi \in \mathbb{R}$. The corresponding eigenvectors are mutually orthogonal. The eivenvectors of a $N\times N$ unitary matrix are a basis for $\mathbb{C}^N$.
+\end{theorem*}
+Semi-Proof: If the unitary is generated by a Hermitian this follows directly from the theorem on Hermitian eigensystems. The real value $\varphi$ is then the eigenvalue of the Hermitian generator of the untiary matrix, and the eigenvectors of the unitary matrix are the same eigenvectors as for the Hermitian generator. 
+
+Finally some properties of eigenvalues of projectors (see before).
+\begin{theorem*}[Eigensystems of Hermitian Projectors]
+    A Hermitian projector $P^\dagger=P$ and $P^2 = P$ has eigenvalues $0$ and $1$
+\end{theorem*}
+Proof: Since the operator is Hermitian it has orthonormal eigenvectors $\ket{v_k}$ with real eigenvalues $v_k$. Lets take one eigenvector $\ket{v}$
+\begin{align}
+    P \ket{v} = v \ket{v}
+\end{align}
+in general it holds that
+\begin{align}
+    P^2 \ket{v} = PP\ket{v} = v^2 \ket{v}
+\end{align}
+but since $P^2=P$, we also have
+\begin{align}
+    P^2 \ket{v} = P\ket{v} = v \ket{v}
+\end{align}
+so in our case it must hold for the eigenvalues $v^2 = v$. For real numbers this means $v=1$ or $v=0$.~\footnote{we actually don't need the Hermiticity here, but we need to think less with it.}
+
+\subsection{Tensor Products}
+In this chapter we will give a mroe precise definition of the symbol $\otimes$ that we used to represent states of multi-qubit systems in the main script. In the world of finite vectorspaces, the symbol $\otimes$ is called the \textit{Kronecker product} (but is predominantly referred to as tensor product). 
+\begin{def*}[Tensor Product (Vectors)] The tensor product maps two vectors to a higher-dimensional vector
+\begin{align}
+    \otimes: \mathbb{C}^{d_1} \times \mathbb{C}^{d_2} \rightarrow \mathbb{C}^{d_1\cdot d_2}.
+\end{align} 
+The output vector can be constructed as
+\begin{align}
+    \begin{pmatrix}
+        a\\b
+    \end{pmatrix}
+    \otimes 
+    \begin{pmatrix}
+        c\\d
+    \end{pmatrix}
+    = \begin{pmatrix}
+        a c \\
+        a d \\
+        b c \\
+        b d \\
+    \end{pmatrix}
+\end{align}
+or, in general
+\begin{align}
+    \mathbf{x} \otimes \mathbf{y} = \begin{pmatrix}
+        x_0 \mathbf{y} \\
+        \vdots \\
+        x_{d_1-1} \mathbf{y} 
+    \end{pmatrix} = \begin{pmatrix}
+        x_0 y_0\\
+        \vdots \\
+        x_0 y_{d_2-1}\\
+        \vdots\\
+        x_{d_1-1} y_{d_2-1}
+    \end{pmatrix}
+\end{align}
+\end{def*}
+We can define the tensor product also for matrices
+\begin{def*}[Tensor Product (Matrices)]\phantom{,,,}\\
+Given two square matrices $A,B$ of dimensions $d_1\otimes d_1$ and $d_2\otimes d_2$, the tensor product maps them to a $d1\cdot d_2 \otimes d_1\cdot d_2$ matrix.
+Exemplatory take a $2\times 2$ matrix and a general matrix $\mathbf{M}$, then the tensor product is
+    \begin{align}
+    \begin{pmatrix}
+        a & b \\
+        c & d 
+    \end{pmatrix} \otimes \mathbf{M}
+    = \begin{pmatrix}
+        a \mathbf{M} & b \mathbf{M} \\
+        c \mathbf{M} & c \mathbf{M}
+    \end{pmatrix}.
+\end{align}
+\end{def*}
+
+An easy consistency check to ensure the the rules to construct the vectors where correct: tensor products of the standard basis vectors become standard basis vectors in the higher dimensional space and their labeling is consistent with binary notation
+\begin{align}
+    \ket{1}\otimes\ket{0} \equiv \mathbf{e}_0 \otimes \mathbf{e}_1 = \begin{pmatrix} 0 & 1\end{pmatrix} \otimes \begin{pmatrix} 1 & 0 \end{pmatrix} = \begin{pmatrix} 0 \\ 0 \\ 1 \\ 0\end{pmatrix} = \mathbf{e}_2 \equiv \ket{10},
+\end{align}
+$\mathbf{e}_2$ is the third basis vector of $\mathbb{C}^4$ and $2$ in binary is $10$.\\
+
+A useful notation for operation on invividual qubits within a $N$-qubit system is to indicate the qubit onto which the matrix acts on in parenthesis (or as an index), in order to avoid endless products of unit matrices. Take for example a two-qubit system, then we can write $\textsc{not}(1)$ to indicate that the 
+\textsc{not} operation will act only on qubit 1 instead of writing $\mathbf{1}\otimes \textsc{not}$ with $\mathbf{1}$ beeing the $2\times2$ unit matrix. Some examples for a $N$-qubit systems and $2\times 2$ matrices $A,B$:
+\begin{align}
+    A(0)B(N-1) &= A \otimes \left(\bigotimes_{1}^{N-2} \mathbf{1}\right) \otimes B
+\end{align}
+\begin{align}
+    A(k) &= \left(\bigotimes_0^{k-1} \mathbf{1} \right)\otimes M \left(\bigotimes_{k+1}^{N-1} \mathbf{1}\right) = \mathbf{1} \otimes \mathbf{1} \otimes \dots \otimes A \otimes \mathbf{1} \dots \otimes \mathbf{1}
+\end{align}
+
+Arithmetical rules (with matrixes $X,Y,Z,A,B,C,D$)\\
+
+\begin{theorem*}[Tensor Products]
+\textbf{bilinearity: }
+\begin{align}
+     X \otimes (Y + Z) = X\otimes Y + X\otimes Z
+\end{align}
+\begin{align}
+     (X+Y) \otimes Z = X\otimes Z + Y\otimes Z
+\end{align}
+\textbf{transpose: } transpose of a tensor product is the tensor product of the transposed matrices
+\begin{align}
+    \left( X \otimes Y \right)^\dagger = X^\dagger \otimes Y^\dagger 
+\end{align}
+\textbf{matrix products:}
+\begin{align}
+    \left(A\otimes B\right) \left( C \otimes D \right) = AC \otimes BD
+\end{align}
+\textbf{non-commutative:}
+\begin{align}
+    X \otimes Y \neq Y \otimes X
+\end{align}
+
+\textbf{trace: } trace of a tensor product is the procut of the individual traces
+\begin{align}
+    \text{tr}\left(X\otimes Y\right) = \text{tr}\left(X\right)\text{tr}\left(Y\right)
+\end{align}
+
+\textbf{spectrum: } the eigenvectors of a tensor product of two matrices are the tensor products of the individual eigenvectors of the original matrices, and the same holds for the eigenvalues~\footnote{tensor products of numbers are just regular multiplications}
+\begin{align}
+    &A \ket{a_k} = a_k \ket{a_k} \\
+    &B \ket{b_k} = b_k \ket{b_k} \\
+    &\left(A \otimes B\right)\ket{\lambda_{kl}} = \lambda_{kl} \ket{\lambda_{kl}}\\
+    &\ket{\lambda_{kl}} = \ket{a_{k}}\otimes\ket{b_l}, \; \lambda_{kl} = a_{k}b_{l}
+\end{align}
+\end{theorem*}
+
+
+
+
+
+

@@ -1,0 +1,151 @@
+\usepackage[utf8]{inputenc}
+\usepackage{physics}
+\usepackage{graphicx}
+\author{Jakob S. Kottmann }
+\usepackage{booktabs}
+\usepackage{algorithmic}
+\usepackage{algorithm}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{xcolor}
+\usepackage{xspace}
+\usepackage[sort&compress,numbers,super]{natbib}
+\usepackage{doi}
+\bibliographystyle{apsrev4-1}
+\bibliographystyle{numeric}
+\usepackage{tikz}
+\usetikzlibrary{quantikz}
+
+% colored boxes
+\usepackage{amsthm}
+\theoremstyle{definition}
+\newtheorem*{algo*}{Algorithm}
+\newtheorem*{theorem*}{Property}
+\newtheorem*{ex*}{Example}
+\newtheorem*{def*}{Def}
+
+\definecolor{unia}{HTML}{3C2673}
+\definecolor{fai}{HTML}{009b5d}
+\definecolor{fai2}{HTML}{66c39e}
+\definecolor{fai3}{HTML}{b3e1ce}
+\definecolor{unia2}{HTML}{8c358b}
+\definecolor{unia3}{HTML}{dbbfdd}
+\definecolor{unia4}{HTML}{eddeee}
+
+\usepackage{sectsty}
+\allsectionsfont{\color{unia}\selectfont}
+\renewcommand{\contentsname}{}
+
+\usepackage[
+breakable,
+]{tcolorbox}
+\tcolorboxenvironment{theorem*}{
+colframe=unia,
+colback=blue!10!white,
+breakable,before skip=10pt,after skip=10pt}
+\tcolorboxenvironment{ex*}{
+colframe=yellow!50!black,
+colback=yellow!10!white,
+breakable,before skip=10pt,after skip=10pt}
+\tcolorboxenvironment{algo*}{
+colframe=unia,
+colback=blue!10!white,
+breakable,before skip=10pt,after skip=10pt}
+\tcolorboxenvironment{def*}{
+colframe=fai,
+colback=fai3,
+breakable,before skip=10pt,after skip=10pt}
+
+\def\highlight{}
+\def\endhighlight{}
+\tcolorboxenvironment{highlight}{
+colframe=yellow!50!black,
+colback=yellow!10!white,
+breakable,before skip=10pt,after skip=10pt}
+
+% for explicit examples
+\newcommand{\0}[0]{\ensuremath \mathbf{0}}
+\newcommand{\1}[0]{\ensuremath \mathbf{1}}
+\newcommand{\2}[0]{\ensuremath \mathbf{2}}
+\newcommand{\3}[0]{\ensuremath \mathbf{3}}
+\newcommand{\4}[0]{\ensuremath \mathbf{4}}
+\newcommand{\5}[0]{\ensuremath \mathbf{5}}
+\newcommand{\6}[0]{\ensuremath \mathbf{6}}
+\newcommand{\7}[0]{\ensuremath \mathbf{7}}
+\newcommand{\8}[0]{\ensuremath \mathbf{8}}
+\newcommand{\9}[0]{\ensuremath \mathbf{9}}
+\newcommand{\kk}[0]{\ensuremath \mathbf{k}}
+\newcommand{\m}[0]{\ensuremath \mathbf{m}}
+\newcommand{\n}[0]{\ensuremath \mathbf{n}}
+
+\newcommand{\hd}[0]{\ensuremath\operatorname{H}}
+
+% colored boxes end
+
+\usepackage{listings}
+
+\definecolor{brightred}{rgb}{1.00,0.00,0.00}
+\definecolor{mediumgray}{rgb}{0.70,0.70,0.70}
+\definecolor{olivegreen}{rgb}{0.49,0.56,0.16}
+\definecolor{purple}{rgb}{0.68,0.00,0.49}
+\definecolor{darkgreen}{rgb}{0.00,0.50,0.00}
+\definecolor{steelblue}{rgb}{0.25,0.44,0.63}
+\definecolor{darkteal}{rgb}{0.00,0.40,0.38}
+\definecolor{brown}{rgb}{0.56,0.13,0.00}
+\definecolor{brickred}{rgb}{0.73,0.13,0.13}
+\definecolor{orange}{rgb}{0.74,0.48,0.00}
+\definecolor{slateblue}{rgb}{0.02,0.16,0.49}
+\definecolor{midblue}{rgb}{0.08,0.33,0.51}
+
+\lstset{
+  language=python,
+  keywordstyle=\color{darkteal},
+  commentstyle=\color{mediumgray},
+  stringstyle=\color{brickred},
+  identifierstyle=\color{midblue},
+  numberstyle=\tiny\color{mediumgray},
+  rulecolor=\color{mediumgray},
+  backgroundcolor=\color{white},
+  emphstyle=\color{brightred},
+  basicstyle=\ttfamily\small,
+  breaklines=true,
+  numbers=left,
+  numbersep=8pt,
+  tabsize=2,
+  showstringspaces=false,
+  emph={int,float,str,list,dict,set,tuple,bool},
+  emphstyle=\color{olivegreen},
+  emph={[2]print,len,range,open,enumerate,zip,map,filter,sorted,sum,min,max,any,all},
+  emphstyle={[2]\color{purple}},
+  literate=
+    {+}{{{\color{steelblue}+}}}1
+    {-}{{{\color{steelblue}-}}}1
+    {*}{{{\color{steelblue}*}}}1
+    {/}{{{\color{steelblue}/}}}1
+    {=}{{{\color{steelblue}=}}}1
+    {==}{{{\color{steelblue}==}}}2
+    {!=}{{{\color{steelblue}!=}}}2
+    {<=}{{{\color{steelblue}<=}}}2
+    {>=}{{{\color{steelblue}>=}}}2
+    {@}{{{\color{steelblue}@}}}1,
+  literate=*%
+    {0}{{{\color{darkgreen}0}}}1
+    {1}{{{\color{darkgreen}1}}}1
+    {2}{{{\color{darkgreen}2}}}1
+    {3}{{{\color{darkgreen}3}}}1
+    {4}{{{\color{darkgreen}4}}}1
+    {5}{{{\color{darkgreen}5}}}1
+    {6}{{{\color{darkgreen}6}}}1
+    {7}{{{\color{darkgreen}7}}}1
+    {8}{{{\color{darkgreen}8}}}1
+    {9}{{{\color{darkgreen}9}}}1
+}
+
+\usepackage{hyperref} 
+\hypersetup{
+    colorlinks,
+    linkcolor={unia},
+    citecolor={fai},
+    urlcolor={fai}
+}
