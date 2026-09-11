@@ -128,7 +128,8 @@ Now the variational principle gives us an upper bound on the true ground state e
 
 Variational quantum algorithms aim to minimize a given parametrized expectation value $E(\theta) = \expval{H}{\Psi(\theta)}$. In order to perform the minimization it is a major advantage to also have access to the derivative $\partial E/\partial\theta $ of the expectation value.
 In the following, we will learn how to compute such derivatives.
-The result is quite surprising, as it is in a sense optimal -- evaluation of the exact derivative of an expectation value will come at the cost of evaluating that expectation value twice.\\
+The result is quite surprising, as it is in a sense optimal -- evaluation of the exact derivative of an expectation value will come at the cost of evaluating that expectation value twice.
+
 We will start with Pauli-Gates and will afterwards sketch generalizations.
 
 \subsubsection*{Derivatives of Pauli-Gates}
@@ -227,7 +228,7 @@ We can now apply the product rule from calculus and arrive at
 \end{enumerate}
 
 \subsubsection*{Beyond the plain shift-rule}
-For some cases, it might be worthwhile to invest some extra work and derive your own rules for the gradients. In the following, we will give a small example.\\
+For some cases, it might be worthwhile to invest some extra work and derive your own rules for the gradients. In the following, we will give a small example.
 
 Consider a gate $e^{-i\frac{\theta}{2}G}$ where the Generator is not exactly self-inverse $G^2\neq G$ but where $G^3=G$ holds again. 
 In a sense, such a gate is close to a Pauli-Gate, but still different enough so that the shift-rule can not be applied.
@@ -275,7 +276,8 @@ and the generated gate is therefore directly shift-rule differentiable.
 \end{algo*}
 The name comes from the simulation of Fermionic systems where the generators of interest (Fermionic excitation generators) have exactly this property. Also some common known gates share this ``Fermionic'' property.
 A typical example is a controlled-Pauli gate $CR_\mathbf{k}$ that has the generator (see previous chapters) $\frac{1}{2}\left(1-Z\right)\otimes P_\mathbf{k}$. 
-The Paulistring $P_\mathbf{k}$ has eigenvalues $\pm 1$, but due to the control operation the eigenvalue $0$ is entering the game (all states where the control qubit is in $\ket{0}$ are automatically eigenstates with eigenvalue $0$.\\
+The Paulistring $P_\mathbf{k}$ has eigenvalues $\pm 1$, but due to the control operation the eigenvalue $0$ is entering the game (all states where the control qubit is in $\ket{0}$ are automatically eigenstates with eigenvalue $0$.
+
 Due to the decomposition into two generators $G_+$ and $G_-$ the Fermionic shift rule requires 4 evaluations~\footnote{one can show that in the case of real quantum states (only real probability amplitudes) we can simplify it to 2 evaluations, ending up at the same cost as the original shift-rule. This is especially helpful if one tries to solve for Fermionic groundstates, which are often real quantum states -- this would be the actual Fermionic shift-rule, while we have directly used a generalization that also holds for complex amplitudes. We will however not go into the details here.}. 
 Let's look at a multi-controlled Pauli-Gate and compare the Fermionic shift-rule with the default strategies (decomposition into Pauli gates). 
 No matter how many control elements we have, we can always apply the Fermionic shift rule (no new eigenvalues are generated), so we get away with 4 evaluations, independent of the number of controls. 
@@ -291,7 +293,7 @@ If we have two controls, we already get 4 Paulistrings
 leading to 8 evaluations if we apply the shift rule. 
 For $n$ control qubits we get $2^n$ Paulistrings
 and therefore $2^{n+1}$ evaluations with the standard shift-rule. 
-So in this case, the Fermionic shift-rule pays off exponentially with respect to the number of controls.\\
+So in this case, the Fermionic shift-rule pays off exponentially with respect to the number of controls.
 
 Besides the standard shift-rule and the Fermionic one, there are other schemes (e.g. the 4-point shift-rule, that works similar to the Fermionic one, and some generalized approaches). We will not go into the details here, but emphasize that it is often worthwhile to implement a customized method. 
 
@@ -307,7 +309,8 @@ An ``ansatz'' for our parametrized state that is a linear combination of states 
 \begin{align}
     \ket{\Psi(\theta,\gamma,c_0,c_1} = c_0U_0(\theta)\ket{0} + c_1U_1(\theta)\ket{1}
 \end{align}
-would currently not be possible to use.\\
+would currently not be possible to use.
+
 Let's see how the expectation value of such a s state would look and identify the missing structures
 \begin{align}
     \bra{\Psi}H\ket{\Psi} &= \left(c_0^*\bra{\psi_0} + c_1^*\bra{\psi_1}\right)H\left(c_0\ket{\psi_0} + c_1\ket{\psi_1}\right)\\\
@@ -383,7 +386,7 @@ Now we need to compute this missing factor
     &\Leftrightarrow  p_0 = \frac{1}{4N_+^2} = \frac{1}{2} +\frac{1}{2} \operatorname{Re}\left(\braket{\phi}{\psi}\right).
 \end{align}
 By rearranging the above formula we arrive at $\operatorname{Re}\left(\braket{\phi}{\psi}\right) = 2p_0 - 1$.
-The derivation for the imaginary part works in the same way.\\
+The derivation for the imaginary part works in the same way.
 
 In some cases, we don't need the inner product between two states, but rather their fidelity
 \begin{def*}[fidelity]
@@ -498,7 +501,7 @@ Now we can plug-in the eigenvalue equation from above and use the normalization
     \bra{\Psi}H\ket{\Psi} &=\lambda \sum_{k} c_k^* c_k = \lambda \cdot 1 = \lambda.
 \end{align}
 Is $\lambda$ now really better as the lowest expectation value over the trial states?
-Yes -- at least better or equal, since the variational principle also holds for the $n\times n$ matrix $\mathbf{H}$. Here the expectation value w.r.t the vector $c_k = \delta_{1k}$ (all components except the first are zero) is identical to $\bra{\psi_1}H\ket{\psi_1}$.\\
+Yes -- at least better or equal, since the variational principle also holds for the $n\times n$ matrix $\mathbf{H}$. Here the expectation value w.r.t the vector $c_k = \delta_{1k}$ (all components except the first are zero) is identical to $\bra{\psi_1}H\ket{\psi_1}$.
 
 What about non-orthogonal effective bases? If we don't have linear dependencies (if we have, we can remove them), this works the same way, just that the generalized eigenvalue equation for the effective matrix is solved
 \begin{align}
@@ -509,7 +512,7 @@ Here $\mathbf{S}$ is the overlap matrix of the effective basis, with elements $s
 \clearpage
 \subsection{Summary}
 
-A prominent and currently one of the most promising applications is the electronic ground state problem. Here the task is to find the ground state (and ideally also other low-energy eigenstates) of an electronic Hamiltonian -- the observable that describes the energy of electrons bounded in an attractive electrostatic potential. Molecules are such systems, and computing their energies is key to predict and understand chemical reactions.\\
+A prominent and currently one of the most promising applications is the electronic ground state problem. Here the task is to find the ground state (and ideally also other low-energy eigenstates) of an electronic Hamiltonian -- the observable that describes the energy of electrons bounded in an attractive electrostatic potential. Molecules are such systems, and computing their energies is key to predict and understand chemical reactions.
 
 A recipe to tackle this problem with the help of quantum computers is
 \begin{enumerate}

@@ -1,7 +1,7 @@
 \section{Quantum Circuits}
-Quantum circuits are graphical representations of quantum operations. Basically they represent one large unitary operation assembled from smaller unitary operations. The primitive unitary operations from which the circuit is assembled are called quantum gates. Usually the gates are the elementary operations that a specific target platform can implement. Note however that there is no strict definition of what is a gate and what is a circuit.\\
+Quantum circuits are graphical representations of quantum operations. Basically they represent one large unitary operation assembled from smaller unitary operations. The primitive unitary operations from which the circuit is assembled are called quantum gates. Usually the gates are the elementary operations that a specific target platform can implement. Note however that there is no strict definition of what is a gate and what is a circuit.
 
-Unfortunately the operational direction in quantum circuit is from left to right (instead of right to left when using matrix multiplication). This is however the only difficulty.\\
+Unfortunately the operational direction in quantum circuit is from left to right (instead of right to left when using matrix multiplication). This is however the only difficulty.
 
 As a first example, take a unitary matrix that is assembled from the three unitary operations $U=\mathcal{CBA}$ that are defined as $\mathcal{A}=A\otimes \mathbf{1}$, $\mathcal{B}= \mathbf{1}\otimes B \otimes \mathbf{1}$, and $\mathcal{C}=C$ with $A,B,C$ being unitary operations acting on a single, two and three qubits respectively. The corresponding circuit diagram looks like
 
@@ -168,7 +168,8 @@ where we have again sorted to ``uncompuation'' to get the desired total state in
 
 \subsection{Universal Gate Sets}
 Quantum processors usually have a restricted set of unitary operations which they can execute. Which operations those are depends on the type of processor. In the following we will have a small overview over the most common operations. 
-\begin{def*}[standard universal gate set]\phantom{...}\\
+\begin{def*}[standard universal gate set]\phantom{...}
+
 The set of quantum operations 
 \begin{align*}
     T, \hd, \textsc{CNOT}
@@ -214,9 +215,11 @@ A cleaner definition is directly via the circuit diagram
 \lstick{$l$} & \targ{}  & \qw \rstick{$l \oplus k$}
 \end{quantikz}
 \end{center}
-where the left two wires denote the input and the right two wires the output.\\
+where the left two wires denote the input and the right two wires the output.
+
 A universal gate set that is more convenient to work with, includes parametrized operations on single qubits
-\begin{def*}[convenient universal gate set]\phantom{...}\\
+\begin{def*}[convenient universal gate set]\phantom{...}
+
 \begin{align}
     u_3(\alpha,\beta,\gamma), \textsc{CNOT}
 \end{align}
@@ -228,7 +231,7 @@ with the general single-qubit rotation
     \end{pmatrix}
 \end{align}
 \end{def*}
-The $u_3$ operation can represent any operation on a single qubit -- take for example: $\hd = u_3(\pi/2, \pi,0)$. In the next sections, we will see, how to compile essentially every  unitary operation to a sequence of this gate set. Compilation into $T,\hd, \text{CNOT}$ is more tricky (and a nice seminar topic of you like number theory).\\
+The $u_3$ operation can represent any operation on a single qubit -- take for example: $\hd = u_3(\pi/2, \pi,0)$. In the next sections, we will see, how to compile essentially every  unitary operation to a sequence of this gate set. Compilation into $T,\hd, \text{CNOT}$ is more tricky (and a nice seminar topic of you like number theory).
 
 % Let's see some examples: take the following unitary, assembled from \textsc{hadamard}, \textsc{not}, and \textsc{cnot} operations
 % \begin{align}
