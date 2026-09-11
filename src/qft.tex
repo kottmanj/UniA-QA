@@ -112,11 +112,11 @@ We can start with just two Hadamard gates, which gives us the mapping:
 \end{align}
 which is a bit disappointing in the end, as it only gets the $\ket{00} \rightarrow \ket{++}$ correct. Through further inspection we see however, that the mapping of $\ket{10}$ is almost correct, just the wrong order -- we can however fix this with a \textsc{SWAP} gate.
 \vspace{0.25cm}
-\hline
+\noindent\rule{\textwidth}{0.4pt}
 \vspace{0.25cm}
 The SWAP gate swaps two basis states $\textsc{SWAP}\ket{i}\otimes\ket{j} = \ket{j}\otimes\ket{i}$ and by linearity it swaps general product states $\textsc{SWAP}\ket{\phi}\otimes\ket{\psi} = \ket{\psi}\otimes\ket{\phi}$. We can realize it with 3 \textsc{cnot} gates (try it for yourself).
 \vspace{0.25cm}
-\hline
+\noindent\rule{\textwidth}{0.4pt}
 \vspace{0.25cm}
 Now we are almost there:
 \begin{align}
@@ -158,7 +158,7 @@ Same game as before. We have the Matrix
 1 & e^{2\pi i \frac{7}{8}} & e^{2\pi i \frac{14}{8}} & e^{2\pi i \frac{21}{8}} & e^{2\pi i \frac{28}{8}} & e^{2\pi i \frac{35}{8}} & e^{2\pi i \frac{42}{8}} & e^{2\pi i \frac{49}{8}} \\
     \end{pmatrix}
 \end{align}
-A common notation that makes things easier is to use the abbreviation $\omega = e^{2\pi i \frac{1}{8}} $ and realize that $\omega^8 = \omega^0 = 1$ and $\omega^9 = \omega^1$ (because $\e^{2\pi i}=1$) and $\omega^4 = -1$ etc, which gives
+A common notation that makes things easier is to use the abbreviation $\omega = e^{2\pi i \frac{1}{8}} $ and realize that $\omega^8 = \omega^0 = 1$ and $\omega^9 = \omega^1$ (because $e^{2\pi i}=1$) and $\omega^4 = -1$ etc, which gives
 \begin{align}
 \frac{1}{\sqrt{8}}
 \begin{pmatrix}
@@ -233,7 +233,7 @@ The circuit for the quantum Fourier transform on $N$ qubits can be assembled
 \ENDFOR
 \ENDFOR
 \FOR{$1 \leq n \leq $ $ \lfloor{N/2}\rfloor$}
-$\texttt{qft} += \texttt{SWAP}(n,N-(n-1))$
+\STATE $\texttt{qft} += \texttt{SWAP}(n,N-(n-1))$
 \ENDFOR
 \RETURN $\texttt{qft}$
 \end{algorithmic}
