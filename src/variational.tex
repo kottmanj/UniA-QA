@@ -52,7 +52,7 @@ Z = \begin{pmatrix}
     1 & 0\\ 0 & -1
 \end{pmatrix}
 \end{align}
-its eigenstates are just the standard basis states of a single qubit with eigenvalues $+1$ for $\ket{0}$ and $-1$ for $\ket{1}$. Let's consider a single qubit in the symmetric superposition of the two basis states, namely the $\ket{+} = \frac{1}{\sqrt{2}}\left(\ket{0}+\ket{1}\right)$ state. If we measure the observable given by $Z$ we either get $+1$ or $-1$, each with a probability of $\frac{1}{2}$. We can directly see, that the expected value is the average result over infinite repetitions -- in this case the average result will be 0 as $+1$ and $-1$ are obtained with equal probabilities. Let's check via the definition by simply applying the matrix $Z$ to the state $\ket{+}$ and then take the inner product with $\bra{+}$:
+its eigenstates are just the standard basis states of a single qubit with eigenvalues $+1$ for $\ket{0}$ and $-1$ for $\ket{1}$. Let's consider a single qubit in the symmetric superposition of the two basis states, namely the $\ket{+} = \frac{1}{\sqrt{2}}\left(\ket{0}+\ket{1}\right)$ state. If we measure the observable given by $Z$ we either get $+1$ or $-1$, each with a probability of $\frac{1}{2}$. We can directly see that the expected value is the average result over infinite repetitions -- in this case the average result will be 0 as $+1$ and $-1$ are obtained with equal probabilities. Let's check via the definition by simply applying the matrix $Z$ to the state $\ket{+}$ and then take the inner product with $\bra{+}$:
 \begin{align}
     \expval{Z}_{+} &= \bra{+}Z\ket{+} = \bra{+}\frac{1}{\sqrt{2}}\left(Z\ket{0} + Z\ket{1} \right) \\
     &= \bra{+} \frac{1}{\sqrt{2}}\left( \ket{0} - \ket{1}\right) = \braket{+}{-} = 0.
@@ -76,7 +76,7 @@ If we know how to diagonalize the small observables $h_k$ (e.g. with a unitary $
 We first apply $U_k^\dagger$ to our qubit state, then we read-out the qubits, if we read out $\ket{\mathbf{l}}$ then this corresponds to the $l$th eigenvalue of $h_k$.
 
 \subsubsection*{Pauli Expectation Values}
-We have seen already, that any Hermitian matrix can be written in the Pauli representation 
+We have seen already that any Hermitian matrix can be written in the Pauli representation 
 \begin{align}
     H = \sum_{k} c_k P_k.
 \end{align}
@@ -181,7 +181,7 @@ On first glance, this didn't really help and it looks like things became more co
 \begin{align}
     R_\mathbf{k}(\theta) \pm R_\mathbf{k}(\theta+\pi) = \sqrt{2} R_\mathbf{k}(\theta \pm \frac{\pi}{2}).
 \end{align}
-With this identity the gradient expression above becomes quite short, and furthermore we realize that it takes the form of a difference between two expectation values, that are equivalent to the original expectation values, just with shifted arguments. 
+With this identity the gradient expression above becomes quite short, and furthermore we realize that it takes the form of a difference between two expectation values that are equivalent to the original expectation values, just with shifted arguments. 
 
 \begin{theorem*}[shift-rule\footnote{M. Schuld \textit{et.al.}, PRA, 2018}]
     Take a state parametrized by a single Pauli-Gate
@@ -208,7 +208,7 @@ Lets consider an expectation value with respect to this circuit
 \begin{align}
     f(\theta) = \expval{H}_{U(\theta)}
 \end{align}
-and in the following, we will write $f(\theta,\theta)$ to emphasize, that the angle $\theta$ appears in two gates.
+and in the following, we will write $f(\theta,\theta)$ to emphasize that the angle $\theta$ appears in two gates.
 We can now apply the product rule from calculus and arrive at
 \begin{align}
     \frac{\partial}{\partial \theta} f(\theta,\theta) = \frac{1}{2}\left(f(\theta+\frac{\pi}{2},\theta) - f(\theta-\frac{\pi}{2},\theta)\right) + \frac{1}{2}\left(f(\theta,\theta+\frac{\pi}{2}) - f(\theta,\theta-\frac{\pi}{2})\right)
@@ -219,7 +219,7 @@ We can now apply the product rule from calculus and arrive at
     \frac{\partial}{\partial \theta} f(g(\theta)) = \frac{\partial g}{\partial \theta} \frac{\partial f}{\partial g}  = \frac{\partial g}{\partial \theta}\frac{1}{2}\left(f(g(\theta)+\frac{\pi}{2}) - f(g(\theta)-\frac{\pi}{2})\right)
 \end{align}
 
-\paragraph{Non-Pauli Gates:} Assume that the gate $U(\theta)$, that we want to differentiate is not a Pauli-Gate. Then we can distinguish between three scenarios, where the last one is the default that always works.
+\paragraph{Non-Pauli Gates:} Assume that the gate $U(\theta)$ that we want to differentiate is not a Pauli-Gate. Then we can distinguish between three scenarios, where the last one is the default that always works.
 \begin{enumerate}
     \item If $U(\theta) = e^{-i\frac{\theta}{2} G}$ with $G^2=1$ the gate has the same properties as a Pauli-Gate, and we can apply the shift-rule. If the factor $-1/2$ in the exponent doesn't work out, we can just transform the parameter accordingly and use the chain rule (see above). 
     \item If $U(\theta) = e^{-i\frac{\theta}{2} G}$ and $G^2 = G$ we can create the generator $\tilde{G} = 2G-1$ for which $\tilde{G}^2 = 4G^2 -4G + 1 = 1$. We can now rewrite $e^{-i\frac{\theta}{2}G} = e^{-i\frac{\theta}{4}\tilde{G}} e^{-i\frac{\theta}{4}} = e^{-i\frac{\theta/2}{2}\tilde{G}} e^{-i\frac{\theta}{4}}$ and at this point we can use the chain rule again to get the same shift-rule just with 1/4 instead of 1/2.  
@@ -237,7 +237,7 @@ We can see this, by writing the generator in it's spectral form~\footnote{You ca
     G = P_+ - P_-
 \end{align}
 where $P_\pm$ are the projectors onto the eigenspaces with eigenvalues $\pm1$ (the eigenspace projector $P_0$ corresponding eigenvalue 0 does not show up, since it would be scaled with 0 anyway).
-Note, that due to orthonormality of the eigenvectors we have: $P_+P_- = P_- P_+= 0$ and $P_\pm^2 = P_\pm$ which leads us to the desired properties
+Note that due to orthonormality of the eigenvectors we have: $P_+P_- = P_- P_+= 0$ and $P_\pm^2 = P_\pm$ which leads us to the desired properties
 \begin{align}
     &G = P_+ - P_-\\
     &G^2 = P_+ + P_-\\
@@ -276,7 +276,7 @@ and the generated gate is therefore directly shift-rule differentiable.
 The name comes from the simulation of Fermionic systems where the generators of interest (Fermionic excitation generators) have exactly this property. Also some common known gates share this ``Fermionic'' property.
 A typical example is a controlled-Pauli gate $CR_\mathbf{k}$ that has the generator (see previous chapters) $\frac{1}{2}\left(1-Z\right)\otimes P_\mathbf{k}$. 
 The Paulistring $P_\mathbf{k}$ has eigenvalues $\pm 1$, but due to the control operation the eigenvalue $0$ is entering the game (all states where the control qubit is in $\ket{0}$ are automatically eigenstates with eigenvalue $0$.\\
-Due to the decomposition into two generators $G_+$ and $G_-$ the Fermionic shift rule requires 4 evaluations~\footnote{one can show, that in the case of real quantum states (only real probability amplitudes) we can simplify it to 2 evaluations, ending up at the same cost as the original shift-rule. This is especially helpful if one tries to solve for Fermionic groundstates, which are often real quantum states -- this would be the actual Fermionic shift-rule, while we have directly used a generalization that also holds for complex amplitudes. We will however not go into the details here.}. 
+Due to the decomposition into two generators $G_+$ and $G_-$ the Fermionic shift rule requires 4 evaluations~\footnote{one can show that in the case of real quantum states (only real probability amplitudes) we can simplify it to 2 evaluations, ending up at the same cost as the original shift-rule. This is especially helpful if one tries to solve for Fermionic groundstates, which are often real quantum states -- this would be the actual Fermionic shift-rule, while we have directly used a generalization that also holds for complex amplitudes. We will however not go into the details here.}. 
 Let's look at a multi-controlled Pauli-Gate and compare the Fermionic shift-rule with the default strategies (decomposition into Pauli gates). 
 No matter how many control elements we have, we can always apply the Fermionic shift rule (no new eigenvalues are generated), so we get away with 4 evaluations, independent of the number of controls. 
 If we decompose into Paulistrings we get 2 Paulistrings from the generator of the controlled-$R_\mathbf{k}$ gate
@@ -320,7 +320,7 @@ The first two elements on the right-hand side of the equations are expectation v
     \end{align*}
     is a complex number with $h_\phi^\psi=\left(h_\psi^\phi\right)^*$.
 \end{def*}
-The name comes from the interpretation, that the state $\psi$ is transitioning into the state $\phi$ under the action of $H$. 
+The name comes from the interpretation that the state $\psi$ is transitioning into the state $\phi$ under the action of $H$. 
 An alternative name here is a ``matrix element'' of $H$. If we use the standard basis, then the elements $h^i_j=\bra{i}H\ket{j}$ represent the matrix components of the observable $H$.
 If the observable is just the unit matrix, the transition element becomes an inner product, or overlap, between the two states. Inner products between arbitrary states are essentially all we will need, because of the following property.
 \begin{theorem*}
@@ -348,7 +348,7 @@ The circuit above estimates the real part of the inner product
 The imaginary part can be evaluated by adding an $S$ gate to the first qubit wire just before the read-out. 
 \end{algo*}
 
-First remember, that the real-part of a complex number can be written as
+First remember that the real-part of a complex number can be written as
 \begin{align}
     &c = \operatorname{Re}(c) + i\operatorname{Im}(c)\\
     &\operatorname{Re} = \frac{1}{2}\left(c + c^*\right)
@@ -364,7 +364,7 @@ The circuit $U$ above, prepares the quantum state
 \end{align}
 In the following we will derive this result.
 At this point, it is easy to make the mistake of assigning $p_0 = \frac{1}{4}$ -- but this can't be, as this would be independent of the two states $\ket{\phi},\ket{\psi}$, which is obviously wrong. Take $\ket{\psi}=\ket{\phi}$, then we should get $p_0=1$ and not $\frac{1}{4}$. 
-The mistake in the assumption above is, that we forgot about normalization of states. Let's write the states on the right-hand side as two proper states
+The mistake in the assumption above is that we forgot about normalization of states. Let's write the states on the right-hand side as two proper states
 \begin{align}
     \ket{\Psi_\pm} = N_\pm \left(\ket{\phi} \pm \ket{\psi}\right)
 \end{align}
@@ -465,7 +465,7 @@ Consider the following scenario: We are given a Hermitian matrix $H$ and want to
 At this point, we at least have the guarantee that $E_1$ is our best approximation to the lowest eigenvalue of $H$ within the expectation values that we so far obtained. 
 But what about linear combinations of the states $\left\{\ket{\psi_k}\right\}_1^n$? 
 Could any of them have a lower expectation value then $E_1$?
-The answer is yes -- just take the simple example $H=X$ and the states $\left\{\ket{0},\ket{1}\right\}$, then the individual expectation values are $E_1=0, E_2=0$ and both equally bad approximations to the lowest eigenvalue which is $-1$. The linear combination $\ket{-} = \frac{1}{\sqrt{2}}\left(\ket{0} - \ket{1}\right)$ is however the exact eigenstate and therefore also has a lower expectation value. In this example the answer to the question is obvious. We will now briefly explore a strategy to find the best linear combination out of a given set of trial states. At first we will assume, that our trial states $\left\{\ket{\psi_k}\right\}_1^n$ are orthogonal: $\braket{\psi_k}{\psi_l}=\delta_{kl}$.
+The answer is yes -- just take the simple example $H=X$ and the states $\left\{\ket{0},\ket{1}\right\}$, then the individual expectation values are $E_1=0, E_2=0$ and both equally bad approximations to the lowest eigenvalue which is $-1$. The linear combination $\ket{-} = \frac{1}{\sqrt{2}}\left(\ket{0} - \ket{1}\right)$ is however the exact eigenstate and therefore also has a lower expectation value. In this example the answer to the question is obvious. We will now briefly explore a strategy to find the best linear combination out of a given set of trial states. At first we will assume that our trial states $\left\{\ket{\psi_k}\right\}_1^n$ are orthogonal: $\braket{\psi_k}{\psi_l}=\delta_{kl}$.
 \begin{algo*}[Effective Basis Diagonalization]
 Given a set of orthonormal trial states $\left\{\ket{\psi_k}\right\}_1^n$ (called the an effective basis) we can find the best linear combination to approximate the lowest eigenvector of $H$ with:
 \begin{enumerate}
@@ -480,7 +480,7 @@ The best possible linear combination is then
 where $c_k$ are the components of the eigenvector $\mathbf{c}$ and the expectation value $\bra{\Psi}H\ket{\Psi} = \lambda$.
 \end{algo*}
 On first glance this algorithm might raise the alarm, as it sounds like it is just restating the original problem. 
-Take however into account, that the original problem is to find the lowest eigenvalue of the $2^N\times 2^N$ matrix $H$, while the effective basis diagonalization is requires us to find the lowest eigenvalue of the $n\times n$ matrix $\mathbf{H}$.~\footnote{if we chose the standard qubit basis $\left\{\ket{k} \right\}_{k=0}^{2^N-1}$, \textit{i.e.} $n=2^N$ then the algorithm is of course not very helpful. The general assumption is that $n<<2^N$.}
+Take however into account that the original problem is to find the lowest eigenvalue of the $2^N\times 2^N$ matrix $H$, while the effective basis diagonalization is requires us to find the lowest eigenvalue of the $n\times n$ matrix $\mathbf{H}$.~\footnote{if we chose the standard qubit basis $\left\{\ket{k} \right\}_{k=0}^{2^N-1}$, \textit{i.e.} $n=2^N$ then the algorithm is of course not very helpful. The general assumption is that $n<<2^N$.}
 The trial states 
 
 

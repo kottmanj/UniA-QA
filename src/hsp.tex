@@ -19,7 +19,7 @@ A classical algorithm to the problem would be
     \item repeat until $M$ pairs are found.
     \item The $M$ pairs $\left(\mathbf{x}_k,\mathbf{x}'_k\right)$ provide enough information to solve the linear system $\mathbf{x}_k = \mathbf{x}'_k \oplus \mathbf{y}$ and determine $\mathbf{y}$.
 \end{enumerate}
-The problem with efficiency is, that, in the worst-case, we need to sample an exponential amount of pairs (leading to exponentially many queries to $f$). The quantum version allows us to find $M$ pairs with a linear amount of queries. An average case analysis improves things classically, but remains exponential, we will not bother with this here.\\
+The problem with efficiency is that, in the worst-case, we need to sample an exponential amount of pairs (leading to exponentially many queries to $f$). The quantum version allows us to find $M$ pairs with a linear amount of queries. An average case analysis improves things classically, but remains exponential, we will not bother with this here.\\
 
 \begin{def*}[Simon's Problem]
 We are given a function $f:\left\{0,1\right\}^N \rightarrow \left\{0,1\right\}^M$ with
@@ -27,7 +27,7 @@ $$ f(\mathbf{x}) = f(\mathbf{z}) \Leftrightarrow \mathbf{x} \oplus \mathbf{y} = 
 for all $\mathbf{x}\neq \mathbf{z}$ and unique hidden $N$-bitstring $\mathbf{y}\in\left\{0,1\right\}^N$ that has to be found.
 \end{def*}
 
-We can already recover a special case: If $\mathbf{y}=\mathbf{0}$ then $\mathbf{x} = \mathbf{x}' \oplus \mathbf{y}$ holds true for \textit{all} pairs $(\mathbf{x}, \mathbf{x}')$, therefore $f(\mathbf{x})=f(\mathbf{x}')$ has to hold for all pairs as well making $f$ constant.~\footnote{Note however, that we can not simply run \texttt{Deutsch-Josza} to identify this case, since after a single run that results in a positive answer, we can not be sure, if the probability was 100\%. The Algorithm needs to be adapted a little, and we will require multiple queries to it, in order to recover $\mathbf{y}$.}
+We can already recover a special case: If $\mathbf{y}=\mathbf{0}$ then $\mathbf{x} = \mathbf{x}' \oplus \mathbf{y}$ holds true for \textit{all} pairs $(\mathbf{x}, \mathbf{x}')$, therefore $f(\mathbf{x})=f(\mathbf{x}')$ has to hold for all pairs as well making $f$ constant.~\footnote{Note however that we can not simply run \texttt{Deutsch-Josza} to identify this case, since after a single run that results in a positive answer, we can not be sure, if the probability was 100\%. The Algorithm needs to be adapted a little, and we will require multiple queries to it, in order to recover $\mathbf{y}$.}
 On the other hand, if the hidden string is not the zero-string, $\mathbf{y}\neq 0$, then the function needs to have $2^N/2$ distinct values: one for each pair $\mathbf{x}, \mathbf{x}\oplus \mathbf{y}$.~\footnote{proof: for $\mathbf{a} \neq \mathbf{b} \oplus \mathbf{y}$ assume $f(\mathbf{a})=f(\mathbf{b})$ then it follows from the promised structure $\mathbf{a} = \mathbf{b} \oplus \mathbf
 y$ which is a contradiction. At the same time, if we have $\mathbf{a} = \mathbf{a}' \oplus \mathbf{y}$ we can not have a second $\mathbf{a} = \mathbf{a}'' \oplus \mathbf{y}$ because  $\mathbf{a}  = \mathbf{a}' \oplus \mathbf{y}= \mathbf{a}'' \oplus \mathbf{y} \Rightarrow \mathbf{a}'=\mathbf{a}''$ }\\
 We can summarize the promised properties of the function $f$ as
@@ -79,7 +79,7 @@ To digest this information, it is beneficial to look at a concrete example.
     & =\frac{1}{\sqrt{2}}\left(\ket{00} + \ket{11}\right)\otimes\ket{+}.
 \end{align}
 So by reading out the first two qubits we either get $00$ or $11$, the two candidates we need to determine $\mathbf{y}$ via the linear system $\mathbf{y}\odot \mathbf{k}=0$. Note again that the end result is independent of the third qubit.
-At this point we also realize, that reading out the second register (that holds the value of $f$ after applying the oracle) is actually not necessary. 
+At this point we also realize that reading out the second register (that holds the value of $f$ after applying the oracle) is actually not necessary. 
 \subsection{Groups and their Properties}
 
 A group is an algebraic structure that obeys the axioms
@@ -287,7 +287,7 @@ with the bitwise inner product $\odot$.~\footnote{now, the naming of this specif
 % where we have used $\mathbf{y}\in A$ and through the group's closedness under its action $\mathbf{k}'=(\mathbf{k}\oplus \mathbf{y})\in A$ for all $\mathbf{k}\in A$.
 \subsection{Quantum Algorithm for \texttt{HSP}}
 Now that we have a nice guiding example through \texttt{Simon} at hand, let's see how the general quantum algorithm for the \texttt{HSP} looks like. 
-We make use of an oracle again, that implements us the function $f$ on two qubit registers
+We make use of an oracle again that implements us the function $f$ on two qubit registers
 \begin{align}
     U_f\left(\ket{g}\otimes\ket
     0\right)=  \ket{g}\otimes \ket{f(g)}
@@ -332,7 +332,7 @@ and end up with the state
 \begin{align}
     \ket{\hat{\psi}}=\frac{|A|}{\sqrt{|G|}} \sum_{k\in A^\perp} \chi_k(h) \ket{k}\\
 \end{align}
-%which maps the classical basis states (the bitstrings $\ket{\mathbf{k}}$) to the characters of the group. Before, the characters where products of $\ket{\pm}$ states, now they are more abstract states $\ket{\chi_k}$, and depend on the group $G$ of the chosen instance of the problem. The basis states $\ket{a\cdot h}$ are therefore mapped to the corresponding character states $\ket{\chi_{h\cdot A}}$ which are linear combinations of the classical basis states with the group characters as probability amplitudes. At this point it is important to remember, that for characters (which are essentially a one-dimensional representation of the group) it holds $\chi_{h\cdot a} = \chi_{h}\chi_a$. 
+%which maps the classical basis states (the bitstrings $\ket{\mathbf{k}}$) to the characters of the group. Before, the characters where products of $\ket{\pm}$ states, now they are more abstract states $\ket{\chi_k}$, and depend on the group $G$ of the chosen instance of the problem. The basis states $\ket{a\cdot h}$ are therefore mapped to the corresponding character states $\ket{\chi_{h\cdot A}}$ which are linear combinations of the classical basis states with the group characters as probability amplitudes. At this point it is important to remember that for characters (which are essentially a one-dimensional representation of the group) it holds $\chi_{h\cdot a} = \chi_{h}\chi_a$. 
 In summary the Fourier transform acts as
 \begin{align}
      \frac{1}{\sqrt{|A|}} \sum_{a\in A} \ket{a\cdot h} \xrightarrow[]{\mathcal{F}} &\frac{1}{\sqrt{|A|}} \sum_{a\in A} \ket{\chi_{a\cdot h}} = \frac{1}{\sqrt{|A||G|}} \sum_{a\in A} \sum_{g\in G}\chi_{a\cdot h}(g)\ket{g}\nonumber\\

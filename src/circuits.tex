@@ -1,5 +1,5 @@
 \section{Quantum Circuits}
-Quantum circuits are graphical representations of quantum operations. Basically they represent one large unitary operation assembled from smaller unitary operations. The primitive unitary operations from which the circuit is assembled are called quantum gates. Usually the gates are the elementary operations that a specific target platform can implement. Note however, that there is no strict definition of what is a gate and what is a circuit.\\
+Quantum circuits are graphical representations of quantum operations. Basically they represent one large unitary operation assembled from smaller unitary operations. The primitive unitary operations from which the circuit is assembled are called quantum gates. Usually the gates are the elementary operations that a specific target platform can implement. Note however that there is no strict definition of what is a gate and what is a circuit.\\
 
 Unfortunately the operational direction in quantum circuit is from left to right (instead of right to left when using matrix multiplication). This is however the only difficulty.\\
 
@@ -109,7 +109,7 @@ the circuit that does the job is
 \lstick{$\ket{0}$} &\qw &\qw &\qw &\qw &\qw &\qw & \targ{} &\qw \rstick{$\ket{\varphi(x_1,x_2,x_3,x_4)}$}\\
 \end{quantikz}
 \end{center}
-For this construction it was very fortunate, that we ``uncomputed'' the bitflips on $x_1$ and $x_2$ already when implementing the first clause. In the same way, this can be helpful to uncompute the two helper bits (here the second and third to last) that carry the information about the individual clauses, since all operations are reversible, and the logical operations are their own inverse, we simply repeat the pattern in opposite direction. The following circuit does the job
+For this construction it was very fortunate that we ``uncomputed'' the bitflips on $x_1$ and $x_2$ already when implementing the first clause. In the same way, this can be helpful to uncompute the two helper bits (here the second and third to last) that carry the information about the individual clauses, since all operations are reversible, and the logical operations are their own inverse, we simply repeat the pattern in opposite direction. The following circuit does the job
 
 \begin{center}
 \begin{quantikz}
@@ -215,7 +215,7 @@ A cleaner definition is directly via the circuit diagram
 \end{quantikz}
 \end{center}
 where the left two wires denote the input and the right two wires the output.\\
-A universal gate set, that is more convenient to work with, includes parametrized operations on single qubits
+A universal gate set that is more convenient to work with, includes parametrized operations on single qubits
 \begin{def*}[convenient universal gate set]\phantom{...}\\
 \begin{align}
     u_3(\alpha,\beta,\gamma), \textsc{CNOT}
@@ -242,7 +242,7 @@ The $u_3$ operation can represent any operation on a single qubit -- take for ex
 % \begin{align}
 %     U = \textsc{cnot}(1,2)\textsc{cnot}(0,1)R_y(0,\theta)\textsc{not}(0)
 % \end{align}
-% the circuit representation of this operation looks basically the same. Here, we will sometimes color the parametrized gates to indicate, that the parameter $\theta$ is not determined yet
+% the circuit representation of this operation looks basically the same. Here, we will sometimes color the parametrized gates to indicate that the parameter $\theta$ is not determined yet
 % \begin{align}
 %     \includegraphics[width=0.3\textwidth]{src/ghz_ry_circuit.pdf}.
 % \end{align}
@@ -258,7 +258,7 @@ The $u_3$ operation can represent any operation on a single qubit -- take for ex
 % \begin{align}
 %     \includegraphics[width=0.3\textwidth]{src/ghz_xy_circuit.pdf},\label{eq:circuit_example_xy}
 % \end{align}
-% so the fact, that the two parametrized gates carry individual parameters is often not emphasized (styles vary though). One can for example often see the explicit notation
+% so the fact that the two parametrized gates carry individual parameters is often not emphasized (styles vary though). One can for example often see the explicit notation
 % \begin{align}
 %     \includegraphics[width=0.3\textwidth]{src/alt_ghz_ry_circuit.pdf}.
 % \end{align}

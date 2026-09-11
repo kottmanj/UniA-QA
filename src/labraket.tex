@@ -41,7 +41,7 @@ We can of course also define our $N$-dimensional real vectors in $\mathbb{R}^N$ 
 
 \subsection{Inner Products \& More}
 With inner products (synonyms: scalar product, dot product) we can give our vector space more structure. An inner product between two vectrors $\ket{a},\ket{b}$ basically computes ``how much of $\ket{b}$ is contained in $\ket{a}$'' or vice versa. In other words we try to come up with an operation that answers the question: ``can we write $\ket{b}$ as $\ket{b} = c\ket{a} + \dots$ with $c$ being a number. The inner product is essentially computing this number $c$ (so if $c=0$ then $\ket{a}$ is not contained in $\ket{b}$)~\footnote{implicitly we are assuming here that all our vectors are normalized (see later in the script) and that whatever comes after the $\dots$ does not contain $\ket{a}$ anymore}
-It turns out, that you can define an inner product axiomatically as:
+It turns out that you can define an inner product axiomatically as:
 \begin{def*}[inner product]
     An inner product between two vectors $\ket{a},\ket{b}\in\mathcal{V}$ is a function $\braket{\cdot}{\cdot}: \mathcal{V}\times\mathcal{V} \rightarrow \mathbb{C}$ that is
     \begin{enumerate}
@@ -73,7 +73,7 @@ The standard example is the inner product of real vectors in $\mathbb{R}^N$ whic
 \end{align*}
 where $a_k$ and $b_k$ are the components of the two vectors.
 \end{ex*}
-We can quickly convince ourselves that the 4 axioms for inner products indeed hold here. Note here, that in $\mathbb{R}^N$ everything is real, so the semi-linearity in the first argument becomes just plain linerarity (no complex conjugates) and in the same way, we can just drop the complex conjugation in axiom 3 (Hermicity).
+We can quickly convince ourselves that the 4 axioms for inner products indeed hold here. Note here that in $\mathbb{R}^N$ everything is real, so the semi-linearity in the first argument becomes just plain linerarity (no complex conjugates) and in the same way, we can just drop the complex conjugation in axiom 3 (Hermicity).
 The neutral element of $\mathbb{R}^N$ is the vector with all components equal to zero. Of course the inner product of this vector with itself will evaluate to zero. At the same time, the inner product of itself can not become zero if at least one component is not equal to zero. Inner products of such vectors with itself will also always be positive (since we will sum up the squares of the components).\\
 We can now think about the complex version of this vectorspace, the $\mathbb{C}^N$, and find an appropriate inner product.
 The intuitive approach is to just use the same inner product as for $\mathbb{R}^N$, but when checking if the axioms hold, we will encounter problems: semi-linearity, Hermiticity and even positive definiteness are not fulfilled anymore. 
@@ -289,7 +289,7 @@ Consider now a second set of arbitrary vectors $\left\{\ket{a_k}\right\}_{k}^N$ 
 \begin{align*}
     A = \sum_{k=1}^N \ket{k}\bra{a_k}.
 \end{align*}
-What isthe action that $A$ performs in words? We can describe it as an operator that acts on an input vector $\ket{f}$ as: `` for each $k$ do the following: compute the inner product of $\bra{a_k}\ket{f}$ and make this the $k$th component of the output vector''.
+What is the action that $A$ performs in words? We can describe it as an operator that acts on an input vector $\ket{f}$ as: `` for each $k$ do the following: compute the inner product of $\bra{a_k}\ket{f}$ and make this the $k$th component of the output vector''.
 Or in other words:
 \begin{align}
     \ket{f} \xrightarrow[]{A} \begin{pmatrix}
@@ -503,7 +503,7 @@ or, in general
 \end{def*}
 We can define the tensor product also for matrices
 \begin{def*}[Tensor Product (Matrices)]\phantom{,,,}\\
-Given two square matrices $A,B$ of dimensions $d_1\otimes d_1$ and $d_2\otimes d_2$, the tensor product maps them to a $d1\cdot d_2 \otimes d_1\cdot d_2$ matrix.
+Given two square matrices $A,B$ of dimensions $d_1\otimes d_1$ and $d_2\otimes d_2$, the tensor product maps them to a $d_1\cdot d_2 \otimes d_1\cdot d_2$ matrix.
 Exemplatory take a $2\times 2$ matrix and a general matrix $\mathbf{M}$, then the tensor product is
     \begin{align}
     \begin{pmatrix}
@@ -532,7 +532,7 @@ A useful notation for operation on invividual qubits within a $N$-qubit system i
     A(k) &= \left(\bigotimes_0^{k-1} \mathbf{1} \right)\otimes M \left(\bigotimes_{k+1}^{N-1} \mathbf{1}\right) = \mathbf{1} \otimes \mathbf{1} \otimes \dots \otimes A \otimes \mathbf{1} \dots \otimes \mathbf{1}
 \end{align}
 
-Arithmetical rules (with matrixes $X,Y,Z,A,B,C,D$)\\
+Arithmetical rules (with matrices $X,Y,Z,A,B,C,D$)\\
 
 \begin{theorem*}[Tensor Products]
 \textbf{bilinearity: }

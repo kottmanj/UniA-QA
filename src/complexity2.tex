@@ -13,7 +13,7 @@ We can then classify the problems as tractable problems, which can be solved in 
 To classify tractable problems, the complexity class $P$ was introduced. \\
 
 The classical complexity classes below are all formally defined for Turing machines -- which you can just view as ``classical computer''.
-Here is a very simple example of a Turing machine: consider the problem of determining if a given integer is odd or even, we can call it $\texttt{even}(n)$. We can encode integers in binary, meaning we can use the alphabet $\Sigma=\left\{0,1\right\}$ to form words that represent integers. We can now write the binary representation of any integer onto the tape of a Turing machine and let the machine figure out if the integer is even -- if it is even, the machine will accept. All the machine needs to do, is to move to the end of the input string and check if it is the symbol 0 -- if so, then the machine can accept, otherwise it just halts (or rejects). If the string consists of $O(N)$ symbols, then this takes roughly $O(N)$ elementary transitions for the machine. Therefore the problem is solved in polynomial time on a Turing machine, and we have $\texttt{even}\in P$. Note here, that the choice of a binary alphabet is kind of arbitrary. We could have also used decimal representation with the alphabet $\Sigma=\left\{0,1,2,3,4,5,6,7,8,9\right\}$. Then, the machine needs to move to the last entry of the input and check if it is any of the symbols $0,2,4,6,8$. So, the machine needs to have some more transitions defined, but the actual runtime will stay linear.\\
+Here is a very simple example of a Turing machine: consider the problem of determining if a given integer is odd or even, we can call it $\texttt{even}(n)$. We can encode integers in binary, meaning we can use the alphabet $\Sigma=\left\{0,1\right\}$ to form words that represent integers. We can now write the binary representation of any integer onto the tape of a Turing machine and let the machine figure out if the integer is even -- if it is even, the machine will accept. All the machine needs to do, is to move to the end of the input string and check if it is the symbol 0 -- if so, then the machine can accept, otherwise it just halts (or rejects). If the string consists of $O(N)$ symbols, then this takes roughly $O(N)$ elementary transitions for the machine. Therefore the problem is solved in polynomial time on a Turing machine, and we have $\texttt{even}\in P$. Note here that the choice of a binary alphabet is kind of arbitrary. We could have also used decimal representation with the alphabet $\Sigma=\left\{0,1,2,3,4,5,6,7,8,9\right\}$. Then, the machine needs to move to the last entry of the input and check if it is any of the symbols $0,2,4,6,8$. So, the machine needs to have some more transitions defined, but the actual runtime will stay linear.\\
 If we change the encoding of our integer to "least significant bit first" then it will only take a single step for a suitable Turing machine (simply just checking if the first bit is 0). The same is true if we take a Random Access Machine (a different model of computation) that is able to directly access datafields. Since the computers we use are closer to Random Access Machines.
 
 \subsection{Complexity Classes}
@@ -43,7 +43,7 @@ $\texttt{Taut}(\varphi)$: Determine if a given Boolean function is a tautology (
 \end{align*}
 but also $\texttt{SubsetSum} \in NPC$ and many more. If we find an efficient algorithm to decide a problem in $NPC$ then we can efficiently decide \textit{all} problems in $NP$ (and additionally all problems in \textit{coNP}). 
 \end{def*}
-Note, that it is not known if $\texttt{Factor}$ is complete for $NP$ (or $coNP$) but it is generally assumed that this is not the case. 
+Note that it is not known if $\texttt{Factor}$ is complete for $NP$ (or $coNP$) but it is generally assumed that this is not the case. 
 
 
 
@@ -72,7 +72,7 @@ These classes are basically the analogues of $P$ and $NP$ with the difference th
     \texttt{GroundState} \in QMA\text{-complete}
 \end{align*}
 \end{def*}
-It turns out, that not only is \texttt{GroundState} $QMA$-complete, but also several restricted versions. It suffices for example to have a ``local'' Hamiltonian $H=\sum_i c_i h_i$, where the ``small'' Hamiltonians $h_i$ only act on a locally restricted part of the system -- in qubit language a $k$-local Hamiltonian can be represented like this, with all $h_i$ only acting on $k$ qubits of the total system.
+It turns out that not only is \texttt{GroundState} $QMA$-complete, but also several restricted versions. It suffices for example to have a ``local'' Hamiltonian $H=\sum_i c_i h_i$, where the ``small'' Hamiltonians $h_i$ only act on a locally restricted part of the system -- in qubit language a $k$-local Hamiltonian can be represented like this, with all $h_i$ only acting on $k$ qubits of the total system.
 For the $QMA$ completeness it suffices to be 2-local, so these problems are already hard.
 
 \subsection{Kitaev's Clock and QMA-Hardness} 
@@ -95,7 +95,7 @@ Going back to Feynman (and later Kitaev) we can define a ``history-state'' that 
 \begin{align}
     \ket{\Psi} = \frac{1}{\sqrt{n+1}}\left( \ket{\mathbf{0}}\otimes \ket{\mathbf{0}} + \sum_{k=1}^n \ket{\mathbf{k}} \otimes \ket{\psi_k} \right)
 \end{align}
-here, we added a second qubit register with $\lfloor \log_2(n)\rfloor + 1$ qubits, that acts as an index for the individual epochs in the history of the computation.
+here, we added a second qubit register with $\lfloor \log_2(n)\rfloor + 1$ qubits that acts as an index for the individual epochs in the history of the computation.
 We will now construct a Hamiltonian, such that the history state is it's groundstate with energy zero. This can be achieved as
 \begin{align}
     H = H_0 + H_c +  H_n
@@ -126,6 +126,6 @@ Through this construction we have the following equivalence: If the quantum algo
 The previous illustration contains the main ideas that show the QMA hardness of \texttt{Groundstate}. Some comments to connect to the actual QMA hardness result
 \begin{itemize}
     \item Instead of looking at a designated quantum algorithm that starts from $\ket{\mathbf0}$, we need to look at a quantum verifier -- a quantum circuit that can take an arbitrary $N$-qubit state (the certificate) as input. Essentially we just need to change $H_0$ (such that we do nothing on the input qubits that encode the quantum verifyier) for that.
-    \item In order to show, that local Hamiltonians (5-local in the original proof by Kitaev) we need to use a different encoding for the clock-register. Instead of $O(\log n)$ qubits, we can just use $n+1$ qubits and use unary encoding: $\ket{\mathbf{0}}=\ket{000\dots}, \ket{\mathbf{1}}=\ket{100\dots}, \ket{\mathbf{2}}=\ket{010\dots }, \ket{\mathbf{3}}=\ket{001\dots}$)
+    \item In order to show that local Hamiltonians (5-local in the original proof by Kitaev) we need to use a different encoding for the clock-register. Instead of $O(\log n)$ qubits, we can just use $n+1$ qubits and use unary encoding: $\ket{\mathbf{0}}=\ket{000\dots}, \ket{\mathbf{1}}=\ket{100\dots}, \ket{\mathbf{2}}=\ket{010\dots }, \ket{\mathbf{3}}=\ket{001\dots}$)
     \item QMA verification is probabilistic, i.e. it suffices if the circuit accepts with probability larger than 2/3 for a valid certificate. This needs to be considered. At the end you have something like: If there is a certificate such that the verifyier accepts with probability $1-\epsilon$, then the clock Hamiltonian has a groundstate close to zero, with some tolerance depending on $\epsilon$.
 \end{itemize}

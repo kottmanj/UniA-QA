@@ -262,7 +262,7 @@ Since $P_\mathbf{k}$ is just a product of Pauli matrices, the unitary $U_\mathbf
 \begin{align}
     U_\mathbf{k} = \prod_{i=1}^N U_{k_i}(i)
 \end{align}
-and the $U_{k_i}$ will diagonalize the Pauli matrix $\sigma_{k_i}$. For unit matrix $k_i=0$ and $Z$ ($k_i=3$) there is nothing to do, which leaves us only with the $X$ and $Y$ cases.\footnote{Note, that we already know a operation that diagonalized $X$ which is the Hadamard operation, but we are now trying to find a single qubit Pauli gate that does the job.}
+and the $U_{k_i}$ will diagonalize the Pauli matrix $\sigma_{k_i}$. For unit matrix $k_i=0$ and $Z$ ($k_i=3$) there is nothing to do, which leaves us only with the $X$ and $Y$ cases.\footnote{Note that we already know a operation that diagonalized $X$ which is the Hadamard operation, but we are now trying to find a single qubit Pauli gate that does the job.}
 By playing with the closed-form of Pauli gates and the Pauli algebra anti-symmetric transformation properties, we find soon that $R_y$ is a good candidate to diagonalize $X$ and vice versa. 
 We give the details for the $X$ case:
 \begin{align}
@@ -361,7 +361,7 @@ Multi qubit gates (operations on multiple qubits) can always be representable as
 \begin{align}
     U = e^{-i\frac{\theta}{2} G}
 \end{align}
-with a suitable Hermitian generator $G$, that itself can always be represented as linear combination of Paulistrings (see Pauli representation above). Problem: Paulistrings don't commute~\footnote{The commutator of two matrices $A,B$ is defined as $[A,B]=AB-BA$. Paulis don't necessarily commpute: e.g. $[X,Y] = XY - YX = XY - (-XY) = 2XY = 2iZ$ (see Pauli algebra from the previous section)} so we can't just use the usual formulas for exponentials in order to get this in a product form. Fortunately, non-commuting mathematical structures have been studied in many forms. One result that comes in Handy is the Lie formula.
+with a suitable Hermitian generator $G$ that itself can always be represented as linear combination of Paulistrings (see Pauli representation above). Problem: Paulistrings don't commute~\footnote{The commutator of two matrices $A,B$ is defined as $[A,B]=AB-BA$. Paulis don't necessarily commpute: e.g. $[X,Y] = XY - YX = XY - (-XY) = 2XY = 2iZ$ (see Pauli algebra from the previous section)} so we can't just use the usual formulas for exponentials in order to get this in a product form. Fortunately, non-commuting mathematical structures have been studied in many forms. One result that comes in Handy is the Lie formula.
 \begin{theorem*}[Lie Formula]
     For two square matrices $A,B$ we have
 \begin{align}
@@ -432,7 +432,7 @@ with $G$ Hermitian, then the controlled version of this unitary is
 \frac{1}{2}\left(1-Z\right)\otimes G}\label{eq:controlled-generator}.
 \end{align}  
 \end{algo*}
-Note, that this works for all generators $G$, not just single-qubit operations. 
+Note that this works for all generators $G$, not just single-qubit operations. 
 If the unitary is a simple Pauli gate $R_\mathbf{k}$, then it suffices to only put the control on the $R_z$ after the compilation of the Pauli gate (as the basis change and \textsc{cnot} ladders will all cancel each other, if the central $R_z$ is switched off).
 With this motivation in mind:
 Let's try the controlled-$R_z$ rotation as an example
@@ -483,7 +483,7 @@ If we now apply the Pauli compiling scheme from before to the $R_{ZZ}$ gate, we 
 % \begin{align}
 % \includegraphics[height=0.1\textwidth]{src/crz_0.pdf}\raisebox{0.6cm}{=}\includegraphics[height=0.1\textwidth]{src/alt2_crz_1.pdf}\raisebox{0.6cm}{=}\includegraphics[height=0.1\textwidth]{src/alt3_crz_1.pdf}.
 % \end{align}
-Note, that the $R_z$ on the first qubit can again be placed anywhere (since it's generator $Z$  commutes with the ``generator'' $\ket{1}\bra{1} = 1/2(1-Z)$ of the control in the \texttt{cnot}), so we have found a quite effective decomposition
+Note that the $R_z$ on the first qubit can again be placed anywhere (since it's generator $Z$  commutes with the ``generator'' $\ket{1}\bra{1} = 1/2(1-Z)$ of the control in the \texttt{cnot}), so we have found a quite effective decomposition
 \begin{equation}
     \tikzset{
         roundmini/.style={draw, circle, fill=unia2, text=white, inner sep=0.1pt, minimum size=1.2em, font=\small}
@@ -563,7 +563,7 @@ We will use the Pauli formalism to construct the quantum oracle used in the \tex
     U_f \ket{\mathbf{x}} = (-1)^{f(\mathbf{x})}\ket{\mathbf{x}}
 \end{align*}
 defined for standard basis states $\ket{\mathbf{x}}$ on $N$ qubits. 
-We first note, that we can also write 
+We first note that we can also write 
 \begin{align*}
     U_f \ket{\mathbf{x}} = e^{-\pi f(\mathbf{x})}\ket{\mathbf{x}},
 \end{align*}
@@ -603,7 +603,7 @@ with
         1, & \text{else}
     \end{cases}
 \end{align}
-where $x_k\in C$ is true, if the variable $x_i$ appears as literal in the clause. Note, that we assume that trivial cases like $(x_k \in C) \wedge (\bar{x}_k\in C)$ have been removed from the clause.
+where $x_k\in C$ is true, if the variable $x_i$ appears as literal in the clause. Note that we assume that trivial cases like $(x_k \in C) \wedge (\bar{x}_k\in C)$ have been removed from the clause.
 For a general formula in conjunctive normal form, we can now construct a generator for each clause and multiply them together 
 \begin{align*}
     f(\mathbf{x}) = \bigwedge_{k=1}^{M} \bigvee_{u\in C_k} u \rightarrow H_f = \prod_{k=1}^{M} H_{C_M}.
