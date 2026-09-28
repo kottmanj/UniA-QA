@@ -3,7 +3,7 @@
 \begin{highlight}
     \textbf{Axioms of Quantum Mechanics (of $N$-Qubits)}
     \begin{enumerate}
-        \item[1a] The state of an single qubit system is described by a $2$ dimensional normalized vector  $\ket{\Psi} \in \mathbb{C}^2$, that is normalized ($\braket{\Psi}{\Psi}=1$) and which can be written as
+        \item[1a] The state of an single qubit system is described by a $2$ dimensional normalized vector  $\ket{\Psi} \in \mathbb{C}^2$ that is normalized ($\braket{\Psi}{\Psi}=1$) and which can be written as
         \begin{align*}
             \ket{\Psi} = c_0 \ket{0} + c_1 \ket{1}.
         \end{align*}
@@ -45,7 +45,7 @@ A more elegant way to write a general state is
 \begin{align}
     \ket{\psi} = \cos\left({\theta}\right)\ket{0} + e^{i\varphi}\sin\left({\theta}\right)\ket{1},\quad \theta,\varphi \in \mathbb{R},\label{eq:one-qubit-angular-state}
 \end{align}
-which ensures normalization for all angles $\theta$ and $\varphi$. If you represent all the possible states on a sphere with radius $r$ and $\theta$ and $\varphi$ as polar ans azimuthal angle, you end up with the famous Bloch sphere that visualizes the states of a single qubit.\\
+which ensures normalization for all angles $\theta$ and $\varphi$. If you represent all the possible states on a sphere with radius $r$ and $\theta$ and $\varphi$ as polar and azimuthal angle, you end up with the famous Bloch sphere that visualizes the states of a single qubit.
 
 \noindent
 Note that in Eq.~\eqref{eq:one-qubit-angular-state} we are able to express the state $\ket{\psi}$ with two real numbers, instead of two complex numbers as in Eq.~\eqref{eq:one-qubit-general-state}. Two complex numbers, on the other hand, can be represented through their real and imaginary parts by four real numbers. One of the four real numbers was eliminated by including the normalization explicitly in the expression of the state, but what about the second real number?~\footnote{come back when you learned about "global phases"}
@@ -71,7 +71,7 @@ instead of the $\cdot$ notation, we can treat the vectors as $1\times 2$ matrice
     \braket{x}{y}\equiv \Vec{x}^\dagger \Vec{y}=\begin{pmatrix} x_0^* & x_1^* \end{pmatrix} \begin{pmatrix} y_0\\y_1
     \end{pmatrix}  = \sum_{k=0}^{k=1} x_k^* y_k 
 \end{align}
-As a matter of fact, the ``braket'' $\braket{\psi}{\phi}$ is just a more general notation for an inner product, and the ``ket'' $\ket{\phi}$ and ``bra'' $\bra{\psi}$ notation is just a more general notation for column vectors and their adjoint row vectors (see also the appendix).\\
+As a matter of fact, the ``braket'' $\braket{\psi}{\phi}$ is just a more general notation for an inner product, and the ``ket'' $\ket{\phi}$ and ``bra'' $\bra{\psi}$ notation is just a more general notation for column vectors and their adjoint row vectors (see also the appendix).
 
 What is the physical interpretation of the inner products here? To answer this, we take the general state from Eq.~\eqref{eq:one-qubit-general-state} and compute the inner products with the basis states
 \begin{align}
@@ -83,7 +83,7 @@ The probability amplitude between a general state $\ket{\psi} = c_0\ket{0} + c_1
 \begin{align}
     \braket{\phi}{\psi} = \frac{1}{\sqrt{2}}\left( c_0 - c_1 \right).
 \end{align}
-Note that we have used the orthonormality $\braket{k}{l}=\delta_{kl}$~\footnote{$\delta_{ij}$: \hyperlink{https://de.wikipedia.org/wiki/Kronecker-Delta}{Kronecker delta}} of the unit vectors of $\mathbb{C}^2$. In the previous lecture we have implicitly imposed this orthogonality condition as the probability to observe $\ket{0}$ when the qubit is in state $\ket{1}$ should be zero in order to stay consistent with our interpretation of the probability amplitudes.\\
+Note that we have used the orthonormality $\braket{k}{l}=\delta_{kl}$~\footnote{$\delta_{ij}$: \hyperlink{https://de.wikipedia.org/wiki/Kronecker-Delta}{Kronecker delta}} of the unit vectors of $\mathbb{C}^2$. In the previous lecture we have implicitly imposed this orthogonality condition as the probability to observe $\ket{0}$ when the qubit is in state $\ket{1}$ should be zero in order to stay consistent with our interpretation of the probability amplitudes.
 
 To summarize: We have seen, how qubits can be represented as elements of the two dimensional complex vector space $\mathbb{C}^2$ with the inner product being identified as the transition amplitude between two states.\footnote{The transition amplitude of a state with itself should always be one, so the precise requirement would be to restrict the qubit state to the unit-sphere of $\mathbb{C}^2$. It is however often more convenient to work with $\mathbb{C}^2$ and ensure normalization otherwise}
 In the literature, you will often find the phrase ``quantum states are elements of an Hilbert space'', this means exactly that, as an Hilbert space is a vector space with inner product~\footnote{the term is actually used to indicate \textit{completeness} of the vector space, this property is however always fulfilled for finite dimensional vector spaces, so we will not need to worry about that}
@@ -111,7 +111,7 @@ The numbers $e^{i\varphi}, \varphi\in\mathbb{R}$ on the complex unit sphere are 
 \end{align}
 we say that the two states differ by a global phase of $e^{i\varphi}$.
 \end{def*}
-Note, that sometimes the angle in the exponent (the $\varphi$ in $e^{i\varphi}$) is called the phase. 
+Note that sometimes the angle in the exponent (the $\varphi$ in $e^{i\varphi}$) is called the phase. 
 Having defined global phases, this brings us to an important property of quantum states.
 \begin{theorem*}[global phase]\phantom{...}\\
     Two states $\ket{\psi}$ and $\ket{\phi}$ that differ only by a global phase
@@ -124,14 +124,15 @@ The ``proof'' is just computing the fidelity
 \begin{align}
     F(\ket{\psi}, e^{i\varphi}\ket{\psi}) = |\bra{\psi}e^{i\varphi}\ket{\psi}|^2 = |e^{i\varphi}|^2|\braket{\psi}{\psi}|^2 = 1 \cdot 1 = 1.
 \end{align}
-This means that we have 100\% change of observing state $\ket{\psi}$ when the system is in state $\ket{\psi'}$, so the two vectors have to describe the same physical state. You can view global phase factors as a form of gauge freedom that you have.\\
+This means that we have 100\% change of observing state $\ket{\psi}$ when the system is in state $\ket{\psi'}$, so the two vectors have to describe the same physical state. You can view global phase factors as a form of gauge freedom that you have.
+
 Here are some analogies:
 \begin{enumerate}
     \item Antiderivatives~\footnote{German: Stammfunktion}: If $F$ is the antiderivative of $f$ then $F+c$ with $c$ being an arbitrary constant is also an antiderivative of $f$ (we have the gauge freedom of choosing the constant to our liking). 
     \item If $\ket{a}$ is an eigenvector of $A$, then the scaled vector $c\ket{a}$ with any non-zero number $c$ is also an eigenvector (we have a gauge freedom in the length of the vectors -- convention is to chose length 1).
 \end{enumerate}
 
-We note at this point, that the global phase equivalence holds for all quantum states (not just single qubits). It can become quite practical when you are compiling a quantum operation into individual gates (as you can ignore global phase differences), but be careful, as soon as the phase is not global it can not be ignored. Take the Deutsch oracle as example
+We note at this point that the global phase equivalence holds for all quantum states (not just single qubits). It can become quite practical when you are compiling a quantum operation into individual gates (as you can ignore global phase differences), but be careful, as soon as the phase is not global it can not be ignored. Take the Deutsch oracle as example
 \begin{align}
     U_f \ket{k} = (-1)^{f(k)}\ket{k}
 \end{align}
@@ -146,7 +147,7 @@ now it depends on $f$ if we are able to write
 This does work, if $f$ is constant, but not in the other case. 
 
 \subsection{Qubit Operations}
-We have identified qubit states as vectors in $\mathbb{C}^2$. A qubit state operation, that acts on a state $\ket{\psi}$ and outputs another state $\ket{\phi}$ can therefore be represented as a $2\times2$ complex matrix $U$
+We have identified qubit states as vectors in $\mathbb{C}^2$. A qubit state operation that acts on a state $\ket{\psi}$ and outputs another state $\ket{\phi}$ can therefore be represented as a $2\times2$ complex matrix $U$
 \begin{align}
     \ket{\phi} = U\ket{\psi}.
 \end{align}
@@ -204,7 +205,7 @@ where $\ket{\Psi_A}\in \mathbb{C}^{2^{N_A}}$ and $\ket{\Psi_B}\in \mathbb{C}^{2^
 \end{def*}
 Examples: 
 \begin{itemize}
-    \item The standard basis states $\ket{\mathbf{k}}$ are always product states (w.r.t to any choice of subsystems $A$,$B$ in the qubits). 
+    \item The standard basis states $\ket{\mathbf{k}}$ are always product states (w.r.t any choice of subsystems $A$,$B$ in the qubits). 
     \item If we apply Hadamards to the standard basis states, we also end up in a product state (some product of $\ket{0},\ket{1},\ket{+},\ket{-}$ on the individual qubits).
 \end{itemize}
 \begin{def*}[entangelement]

@@ -41,7 +41,7 @@ We can of course also define our $N$-dimensional real vectors in $\mathbb{R}^N$ 
 
 \subsection{Inner Products \& More}
 With inner products (synonyms: scalar product, dot product) we can give our vector space more structure. An inner product between two vectrors $\ket{a},\ket{b}$ basically computes ``how much of $\ket{b}$ is contained in $\ket{a}$'' or vice versa. In other words we try to come up with an operation that answers the question: ``can we write $\ket{b}$ as $\ket{b} = c\ket{a} + \dots$ with $c$ being a number. The inner product is essentially computing this number $c$ (so if $c=0$ then $\ket{a}$ is not contained in $\ket{b}$)~\footnote{implicitly we are assuming here that all our vectors are normalized (see later in the script) and that whatever comes after the $\dots$ does not contain $\ket{a}$ anymore}
-It turns out, that you can define an inner product axiomatically as:
+It turns out that you can define an inner product axiomatically as:
 \begin{def*}[inner product]
     An inner product between two vectors $\ket{a},\ket{b}\in\mathcal{V}$ is a function $\braket{\cdot}{\cdot}: \mathcal{V}\times\mathcal{V} \rightarrow \mathbb{C}$ that is
     \begin{enumerate}
@@ -73,8 +73,9 @@ The standard example is the inner product of real vectors in $\mathbb{R}^N$ whic
 \end{align*}
 where $a_k$ and $b_k$ are the components of the two vectors.
 \end{ex*}
-We can quickly convince ourselves that the 4 axioms for inner products indeed hold here. Note here, that in $\mathbb{R}^N$ everything is real, so the semi-linearity in the first argument becomes just plain linerarity (no complex conjugates) and in the same way, we can just drop the complex conjugation in axiom 3 (Hermicity).
-The neutral element of $\mathbb{R}^N$ is the vector with all components equal to zero. Of course the inner product of this vector with itself will evaluate to zero. At the same time, the inner product of itself can not become zero if at least one component is not equal to zero. Inner products of such vectors with itself will also always be positive (since we will sum up the squares of the components).\\
+We can quickly convince ourselves that the 4 axioms for inner products indeed hold here. Note here that in $\mathbb{R}^N$ everything is real, so the semi-linearity in the first argument becomes just plain linerarity (no complex conjugates) and in the same way, we can just drop the complex conjugation in axiom 3 (Hermicity).
+The neutral element of $\mathbb{R}^N$ is the vector with all components equal to zero. Of course the inner product of this vector with itself will evaluate to zero. At the same time, the inner product of itself can not become zero if at least one component is not equal to zero. Inner products of such vectors with itself will also always be positive (since we will sum up the squares of the components).
+
 We can now think about the complex version of this vectorspace, the $\mathbb{C}^N$, and find an appropriate inner product.
 The intuitive approach is to just use the same inner product as for $\mathbb{R}^N$, but when checking if the axioms hold, we will encounter problems: semi-linearity, Hermiticity and even positive definiteness are not fulfilled anymore. 
 A simple fix for the semi-linearity comes to mind: just replace the components of the first argument (the $a_k$ in the formula above) with their corresponding complex conjugates. This obviously fixes the semi-linearity axiom, but on further inspection also fixes the other axioms. 
@@ -133,12 +134,13 @@ In general we can define a $p$-norm with finite $p\geq 1 $ as
 \begin{align}
     \| \ket{a} \|_p = \left(\sum_{k=1}^N |a_k|^p\right)^{\frac{1}{p}}, \quad \ket{a}\in\mathbb{C}^N.
 \end{align}
-All of these norms fulfill the axioms for norms stated above, but note however that the $p=2$ is the only norm that is induced by an inner product (for the others you can not define one that induces them).\\
+All of these norms fulfill the axioms for norms stated above, but note however that the $p=2$ is the only norm that is induced by an inner product (for the others you can not define one that induces them).
+
 In the same way as inner products induce norms, norms induce metrics -- a quantification of distance between two vectors. The induces metric $d_2$ of 2-norms is the norm of the difference between two vectors 
 \begin{align*}
     d_2(\ket{a}, \ket{b}) = \| \ket{a} - \ket{b} \|_2,
 \end{align*}
-which is also our intuitive notion of differences between vectors imagined as arrows. Note that metrics can also be defined axiomatically, but we won't bother with it here.\\
+which is also our intuitive notion of differences between vectors imagined as arrows. Note that metrics can also be defined axiomatically, but we won't bother with it here.
 
 Through the notion of norms and metrics (lengths and distances) we are now able to give an intuitive explanation for the various complex conjugations that appear in the definition of the inner product above. Those might appear strange on first encounter, but they make perfect sense.
 Consider the distance $d_2(a,b)$ of two vectors $\ket{a}$,$\ket{b}$ which is just induced by the norm $d_2(a,b) = \|\ket{a}-\ket{b} \|$ that is itself induced from the inner product. 
@@ -243,7 +245,7 @@ You can for example take a window function, or a step function (which is obvious
 \subsection{Matrices}
 In the previous section we have encountered the ``bra elements'' of a vectorspace and scratched on the surface why things become more complicated for infinite dimensional vectorspaces. 
 In the main part of the course, we will deal mostly with quantum states on a finite number of qubits, therefore we will only need exponentially large, but still finite dimensional vectorspaces $\mathbb{C}^N$, so these issues won't bother us much. 
-We will now construct more advanced linear operators and end up with the good old matrices.\\
+We will now construct more advanced linear operators and end up with the good old matrices.
 
 We have seen that a bra-vector $\bra{a}$ is essentially a linear functional with the instruction ``form the inner product with the next vector to your right''.
 The inner product itself is then written as the braket $\braket{a}{b}$.
@@ -254,7 +256,7 @@ The object $\ket{a}\bra{b}$ is a linear operator that takes a vector, say $\ket{
     \left(\ket{a}\bra{b}\right)\ket{c} = \ket{a}\braket{b}{c}
 \end{align*}
 \end{def*}
-Note that these ketbra operators can in principle map between two different vectorspaces, we will however almost always use them between the same vectorspaces (so $M=N$ in almost all cases). If different vectprspaces are involved, it usually makes sense to somehow clarify this in the notation. In the following we will, if not explicitly mentioned otherwise, always assume that the individual vectors that form the ketbra have the same dimension.\\
+Note that these ketbra operators can in principle map between two different vectorspaces, we will however almost always use them between the same vectorspaces (so $M=N$ in almost all cases). If different vectprspaces are involved, it usually makes sense to somehow clarify this in the notation. In the following we will, if not explicitly mentioned otherwise, always assume that the individual vectors that form the ketbra have the same dimension.
 
 \begin{def*}[projector]
     An operator $X$ is a projector when it is idempotent
@@ -282,14 +284,14 @@ Note that these ketbra operators can in principle map between two different vect
         \sum_{k=1}^N \ket{x_k}\bra{x_k} = 1.
     \end{align*}
 \end{theorem*}
-The resolution of the identity often comes in handy since we can always insert unit operations into our equations and then expand those into convenient bases.\\
+The resolution of the identity often comes in handy since we can always insert unit operations into our equations and then expand those into convenient bases.
 
 At this point we will have a brief callback to the standard basis in $\mathbb{C}^N$, which was denoted as $\left\{\ket{k}\right\}_{k=1}^N$ (see the chapter on orthogonality). 
 Consider now a second set of arbitrary vectors $\left\{\ket{a_k}\right\}_{k}^N$ that don't necessarily have to be orthonormal and form the operator
 \begin{align*}
     A = \sum_{k=1}^N \ket{k}\bra{a_k}.
 \end{align*}
-What isthe action that $A$ performs in words? We can describe it as an operator that acts on an input vector $\ket{f}$ as: `` for each $k$ do the following: compute the inner product of $\bra{a_k}\ket{f}$ and make this the $k$th component of the output vector''.
+What is the action that $A$ performs in words? We can describe it as an operator that acts on an input vector $\ket{f}$ as: `` for each $k$ do the following: compute the inner product of $\bra{a_k}\ket{f}$ and make this the $k$th component of the output vector''.
 Or in other words:
 \begin{align}
     \ket{f} \xrightarrow[]{A} \begin{pmatrix}
@@ -307,7 +309,7 @@ We can therefore just represent the operator as the collection of row-vectors $\
         (a_N)_1^* & (a_N)_2^* & \dots & (a_N)_N^* \\
     \end{pmatrix}
 \end{align}
-this familiar representation of the linear operator is called matrix, and the numbers $(a_k)_l^\ast \equiv a_{kl}^\ast$ the matrix elements.~\footnote{if the complex conjugation seems weird: this is just because we have defined the operator $\ket{k}\bra{a}$ over the ket vector $\ket{a}$, so the components of $\bra{a}$ are the complex conjugated components of $\ket{a}$.}\\
+this familiar representation of the linear operator is called matrix, and the numbers $(a_k)_l^\ast \equiv a_{kl}^\ast$ the matrix elements.~\footnote{if the complex conjugation seems weird: this is just because we have defined the operator $\ket{k}\bra{a}$ over the ket vector $\ket{a}$, so the components of $\bra{a}$ are the complex conjugated components of $\ket{a}$.}
 
 To arrive at the same expression, we can use the resolution of the identity with the standard basis:
 \begin{align}
@@ -366,13 +368,13 @@ The explicit steps in the equations above are left out. Try them yourself as an 
     &= \frac{1}{2}\left(\bra{1} + \bra{2}\right)\left(\ket{1}\bra{2} + \ket{2}\bra{1}\right)\left(\ket{1} + \ket{2}\right) = 1
 \end{align}
 and so on.
-An alternative way to derive the result is to represent $\ket{1}$ and $\ket{2}$ as linear combinations of $\ket{+}$ and $\ket{-}$ and plug that into the definition of $X$.\\
+An alternative way to derive the result is to represent $\ket{1}$ and $\ket{2}$ as linear combinations of $\ket{+}$ and $\ket{-}$ and plug that into the definition of $X$.
 
 In the previous section, we have introduced the dagger operation that converts ket to bra vectors. Since a matrix $M$ applied to a (ket) vector $\ket{a}$ is again a (ket) vector $\ket{b} = M\ket{a}$.
 Now we can form the bra element $\bra{b}$ and ask which relation $\bra{b}$ ad $\bra{a}$ have, given that we know the relation of their corresponding ket elements. We are looking for the matrix $V$ that gives us $\bra{b} = \bra{a}V$ (note that $\bra{a}V$ is still an operator that "takes" a vector from the right and converts it into a complex number). It seems obvious that $V$ has to have something to do with $M$, so we call $V$ the ``daggered'' matrix of $M$ and write $V=M^\dagger$ or just $\bra{b} = \bra{a}M^\dagger$.
 
 \begin{def*}[dagger on matrices]
-Let $M$ be a matrix with elements $m_{kl}$. Then $M^\dagger$ is the matrix with elements $\tilde{m}_{kl} = m_{lk}^*$. So the dagger operation is the transposed matrix with all elements complex conjugated $M^\dagger = \left(M^T\right)^*$.\\
+Let $M$ be a matrix with elements $m_{kl}$. Then $M^\dagger$ is the matrix with elements $\tilde{m}_{kl} = m_{lk}^*$. So the dagger operation is the transposed matrix with all elements complex conjugated $M^\dagger = \left(M^T\right)^*$.
 
 The dagger operation acts on a product of matrices as
 \begin{align*}
@@ -503,7 +505,7 @@ or, in general
 \end{def*}
 We can define the tensor product also for matrices
 \begin{def*}[Tensor Product (Matrices)]\phantom{,,,}\\
-Given two square matrices $A,B$ of dimensions $d_1\otimes d_1$ and $d_2\otimes d_2$, the tensor product maps them to a $d1\cdot d_2 \otimes d_1\cdot d_2$ matrix.
+Given two square matrices $A,B$ of dimensions $d_1\otimes d_1$ and $d_2\otimes d_2$, the tensor product maps them to a $d_1\cdot d_2 \otimes d_1\cdot d_2$ matrix.
 Exemplatory take a $2\times 2$ matrix and a general matrix $\mathbf{M}$, then the tensor product is
     \begin{align}
     \begin{pmatrix}
@@ -521,7 +523,7 @@ An easy consistency check to ensure the the rules to construct the vectors where
 \begin{align}
     \ket{1}\otimes\ket{0} \equiv \mathbf{e}_0 \otimes \mathbf{e}_1 = \begin{pmatrix} 0 & 1\end{pmatrix} \otimes \begin{pmatrix} 1 & 0 \end{pmatrix} = \begin{pmatrix} 0 \\ 0 \\ 1 \\ 0\end{pmatrix} = \mathbf{e}_2 \equiv \ket{10},
 \end{align}
-$\mathbf{e}_2$ is the third basis vector of $\mathbb{C}^4$ and $2$ in binary is $10$.\\
+$\mathbf{e}_2$ is the third basis vector of $\mathbb{C}^4$ and $2$ in binary is $10$.
 
 A useful notation for operation on invividual qubits within a $N$-qubit system is to indicate the qubit onto which the matrix acts on in parenthesis (or as an index), in order to avoid endless products of unit matrices. Take for example a two-qubit system, then we can write $\textsc{not}(1)$ to indicate that the 
 \textsc{not} operation will act only on qubit 1 instead of writing $\mathbf{1}\otimes \textsc{not}$ with $\mathbf{1}$ beeing the $2\times2$ unit matrix. Some examples for a $N$-qubit systems and $2\times 2$ matrices $A,B$:
@@ -532,7 +534,7 @@ A useful notation for operation on invividual qubits within a $N$-qubit system i
     A(k) &= \left(\bigotimes_0^{k-1} \mathbf{1} \right)\otimes M \left(\bigotimes_{k+1}^{N-1} \mathbf{1}\right) = \mathbf{1} \otimes \mathbf{1} \otimes \dots \otimes A \otimes \mathbf{1} \dots \otimes \mathbf{1}
 \end{align}
 
-Arithmetical rules (with matrixes $X,Y,Z,A,B,C,D$)\\
+Arithmetical rules (with matrices $X,Y,Z,A,B,C,D$)
 
 \begin{theorem*}[Tensor Products]
 \textbf{bilinearity: }

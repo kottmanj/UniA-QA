@@ -1,5 +1,5 @@
 \section{Quantum Fourier Transformation}
-We have already encountered the quantum phase estimation \textsc{qpe} where we assumed to have access to the quantum Fourier transformation \textsc{qft}. In the following we will see how to realize it.\\
+We have already encountered the quantum phase estimation \textsc{qpe} where we assumed to have access to the quantum Fourier transformation \textsc{qft}. In the following we will see how to realize it.
 
 \subsection{Discrete Fourier Transformation} 
 \begin{def*}[\texttt{DFT}]
@@ -66,7 +66,7 @@ The transformed states are
     \ket{0} \rightarrow \ket{\hat{0}}&=\ket{+}\\
     \ket{1} \rightarrow \ket{\hat{1}}&=\ket{-}.
 \end{align}
-Admitedly, that was not very exciting.
+Admitedly that was not very exciting.
 \subsubsection*{2-Qubits}
 The now 4-dimensional \textsc{QFT} is
 \begin{align}
@@ -110,13 +110,13 @@ We can start with just two Hadamard gates, which gives us the mapping:
     \ket{10} &\xrightarrow{\mathsc{H}\otimes \mathsc{H}} \ket{-+} \\
     \ket{11} &\xrightarrow{\mathsc{H}\otimes \mathsc{H}} \ket{--} \\
 \end{align}
-which is a bit disappointing in the end, as it only gets the $\ket{00} \rightarrow \ket{++}$ correct. Through further inspection we see however, that the mapping of $\ket{10}$ is almost correct, just the wrong order -- we can however fix this with a \textsc{SWAP} gate.
+which is a bit disappointing in the end, as it only gets the $\ket{00} \rightarrow \ket{++}$ correct. Through further inspection we see however that the mapping of $\ket{10}$ is almost correct, just the wrong order -- we can however fix this with a \textsc{SWAP} gate.
 \vspace{0.25cm}
-\hline
+\noindent\rule{\textwidth}{0.4pt}
 \vspace{0.25cm}
 The SWAP gate swaps two basis states $\textsc{SWAP}\ket{i}\otimes\ket{j} = \ket{j}\otimes\ket{i}$ and by linearity it swaps general product states $\textsc{SWAP}\ket{\phi}\otimes\ket{\psi} = \ket{\psi}\otimes\ket{\phi}$. We can realize it with 3 \textsc{cnot} gates (try it for yourself).
 \vspace{0.25cm}
-\hline
+\noindent\rule{\textwidth}{0.4pt}
 \vspace{0.25cm}
 Now we are almost there:
 \begin{align}
@@ -136,7 +136,7 @@ with the control-qubit in $CR$ being the right qubit. We can represent this as a
 \begin{align}
     \includegraphics[width=0.4\textwidth]{src/circuit_qft_2qubits.pdf}
 \end{align}
-Note, that the operation $R(\pi/2)$ is often denoted as $S$ which is common for this special angle
+Note that the operation $R(\pi/2)$ is often denoted as $S$ which is common for this special angle
 \begin{align}
    R(\pi/2) = \begin{pmatrix}
         1 & 0 \\ 0 & i 
@@ -158,7 +158,7 @@ Same game as before. We have the Matrix
 1 & e^{2\pi i \frac{7}{8}} & e^{2\pi i \frac{14}{8}} & e^{2\pi i \frac{21}{8}} & e^{2\pi i \frac{28}{8}} & e^{2\pi i \frac{35}{8}} & e^{2\pi i \frac{42}{8}} & e^{2\pi i \frac{49}{8}} \\
     \end{pmatrix}
 \end{align}
-A common notation that makes things easier is to use the abbreviation $\omega = e^{2\pi i \frac{1}{8}} $ and realize that $\omega^8 = \omega^0 = 1$ and $\omega^9 = \omega^1$ (because $\e^{2\pi i}=1$) and $\omega^4 = -1$ etc, which gives
+A common notation that makes things easier is to use the abbreviation $\omega = e^{2\pi i \frac{1}{8}} $ and realize that $\omega^8 = \omega^0 = 1$ and $\omega^9 = \omega^1$ (because $e^{2\pi i}=1$) and $\omega^4 = -1$ etc, which gives
 \begin{align}
 \frac{1}{\sqrt{8}}
 \begin{pmatrix}
@@ -233,7 +233,7 @@ The circuit for the quantum Fourier transform on $N$ qubits can be assembled
 \ENDFOR
 \ENDFOR
 \FOR{$1 \leq n \leq $ $ \lfloor{N/2}\rfloor$}
-$\texttt{qft} += \texttt{SWAP}(n,N-(n-1))$
+\STATE $\texttt{qft} += \texttt{SWAP}(n,N-(n-1))$
 \ENDFOR
 \RETURN $\texttt{qft}$
 \end{algorithmic}

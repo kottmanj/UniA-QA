@@ -5,10 +5,9 @@
 \section{Shor's Factoring Algorithm}
 % rename this section as you like, e.g. Applications of QFT, ...
 
-In 1995, Peter Shor introduced a quantum algorithm that efficiently solves the integer factoring problem, i.e., decomposing large numbers into their prime factors in polynomial time. This was groundbreaking because factoring is believed to require exponential costs on a classical computer, which is why it became the basis of widely used cryptographic systems like RSA encryption\footnote{In fact, cryptographic standards are now evolving in response to the potential threat posed by quantum computers capable of running Shor’s algorithm.}. The implications of Shor's work are therefore enormous: Not only does it demonstrate a concrete case of practical quantum advantage, but it also provides a credible challenge to the strong Church-Turing thesis\footnote{in simple words, the thesis states that all efficient algorithms can be reduced to (probabilistic) Turing machines. Shor's Algorithm challenges the thesis since a quantum computer can efficiently factor primes, but to this day, there is no efficient classical algorithm. The prime-factoring problem is in fact a candidate for an $NP$-Intermediate problem -- conjectured to be neither $NP$-complete nor in $P$.}. This finding catalyzed the modern field of quantum computing, spurring both theoretical research and the development of actual quantum hardware. \\
+In 1995, Peter Shor introduced a quantum algorithm that efficiently solves the integer factoring problem, i.e., decomposing large numbers into their prime factors in polynomial time. This was groundbreaking because factoring is believed to require exponential costs on a classical computer, which is why it became the basis of widely used cryptographic systems like RSA encryption\footnote{In fact, cryptographic standards are now evolving in response to the potential threat posed by quantum computers capable of running Shor’s algorithm.}. The implications of Shor's work are therefore enormous: Not only does it demonstrate a concrete case of practical quantum advantage, but it also provides a credible challenge to the strong Church-Turing thesis\footnote{in simple words, the thesis states that all efficient algorithms can be reduced to (probabilistic) Turing machines. Shor's Algorithm challenges the thesis since a quantum computer can efficiently factor primes, but to this day, there is no efficient classical algorithm. The prime-factoring problem is in fact a candidate for an $NP$-Intermediate problem -- conjectured to be neither $NP$-complete nor in $P$.}. This finding catalyzed the modern field of quantum computing, spurring both theoretical research and the development of actual quantum hardware. 
 
-
-At its core, Shor’s algorithm is just a clever application of the quantum phase estimation \texttt{QPE} that includes the quantum Fourier transform \texttt{QFT} as a subalgorithm (see previous chapters). It relies on the observation that the factoring problem can be reduced to the order finding problem, which can be efficiently solved with \texttt{QPE}.\\
+At its core, Shor’s algorithm is just a clever application of the quantum phase estimation \texttt{QPE} that includes the quantum Fourier transform \texttt{QFT} as a subalgorithm (see previous chapters). It relies on the observation that the factoring problem can be reduced to the order finding problem, which can be efficiently solved with \texttt{QPE}.
 
 The quantum part of Shor's algorithm solves the order-finding problem. We will start with this and will then see how order-finding is used for integer factoring.
 
@@ -27,7 +26,7 @@ The coprime integers $N=5$ and $x=3$ give the sequence
 which tells us that the order of $3$ modulo $5$ is $4$. 
 \end{ex*}
 
-While this might seem easy to solve at first, note that for large integers, the value of $r$ can be very large, making an enumeration strategy like the one above highly impractical. In fact, order-finding is believed to be hard on classical computers, meaning that no known algorithm can solve it using only polynomial resources in $L\equiv\ceil{\log{N}}$, which is the number of bits encoding $N$. \\
+While this might seem easy to solve at first, note that for large integers, the value of $r$ can be very large, making an enumeration strategy like the one above highly impractical. In fact, order-finding is believed to be hard on classical computers, meaning that no known algorithm can solve it using only polynomial resources in $L\equiv\ceil{\log{N}}$, which is the number of bits encoding $N$. 
 
 Instead, Shor proposed to solve this problem efficiently using quantum phase estimation (\texttt{QPE}) applied to the unitary operator
 \begin{equation}
@@ -57,7 +56,7 @@ which means we do not need to explicitly prepare $\ket{u_s}$. Instead, we can si
 \begin{equation}
     U^j\ket{1} = \ket{x^j\Mod{N}},
 \end{equation}
-which exactly reproduces the elements of the periodic sequence we are trying to analyze.\\
+which exactly reproduces the elements of the periodic sequence we are trying to analyze.
 
 The quantum algorithm for order-finding is finally summarized as follows.
 
@@ -104,12 +103,12 @@ Given an odd composite integer $N$ and its $m$ distinct prime factors. Let $x$ b
 \end{equation}
 is at least $1-1/2^m$.
 \end{theorem*}
-This second theorem implies that if we chose a random number $y<N$, coprime to $N$, it is quite likely to have an order $r$ which is even and satisfies \eqref{eq:modexp2}. Linking this statement to the first property, we get that $x\equiv y^{\frac{r}{2}}\Mod{N}$ is a solution to \eqref{eq:modexp}.\\
-
+This second theorem implies that if we chose a random number $y<N$, coprime to $N$, it is quite likely to have an order $r$ which is even and satisfies \eqref{eq:modexp2}. Linking this statement to the first property, we get that $x\equiv y^{\frac{r}{2}}\Mod{N}$ is a solution to \eqref{eq:modexp}.
 
 Combining these considerations results in Shor's algorithm for integer factoring.
 \begin{algo*}[Shor's Factoring Algorithm]\phantom{...}\\
-Given a composite integer $N$, output a non-trivial factor of $N$.\\
+Given a composite integer $N$, output a non-trivial factor of $N$.
+
 \begin{algorithmic}
 \STATE \textbf{if} $N \Mod{2} = 0$ \textbf{return} $2$ \hfill // check if $N$ is even
 \STATE \textbf{if} $N = a^b$ for some $a \geq 1$, $b \geq 2$ \textbf{return} $a$ \hfill // check if $N$ is perfect power
@@ -129,7 +128,6 @@ Given a composite integer $N$, output a non-trivial factor of $N$.\\
 \STATE $\quad\quad$\textbf{else} \textbf{continue}
 \end{algorithmic}
 \end{algo*}
-The first two lines of preprocessing ensure that $N$ is an odd composite integer with more than one prime factor. This can be done using standard classical routines in $\mathcal{O}(1)$ and $\mathcal{O}\left(L^3\right)$ time. In the main step of the algorithm, we either immediately find a factor from a randomly selected element $x \in\{1, \ldots, N-1\}$ or we continue with the quantum order-finding subroutine from the previous section to compute the order $r$ of $x$ $\Mod{N}$. Using the above properties, we then attempt to extract a non-trivial factor of $N$ from $r$. This succeeds with probability at least $\frac{1}{2}$ for each iteration, provided $r$ is even and $x^{r / 2} \not \equiv \pm 1 \Mod{N}$.\\
-
+The first two lines of preprocessing ensure that $N$ is an odd composite integer with more than one prime factor. This can be done using standard classical routines in $\mathcal{O}(1)$ and $\mathcal{O}\left(L^3\right)$ time. In the main step of the algorithm, we either immediately find a factor from a randomly selected element $x \in\{1, \ldots, N-1\}$ or we continue with the quantum order-finding subroutine from the previous section to compute the order $r$ of $x$ $\Mod{N}$. Using the above properties, we then attempt to extract a non-trivial factor of $N$ from $r$. This succeeds with probability at least $\frac{1}{2}$ for each iteration, provided $r$ is even and $x^{r / 2} \not \equiv \pm 1 \Mod{N}$.
 
 Lastly note that all parts of this algorithm can be executed efficiently on a classical computer except for the order-finding subroutine, which is where the quantum advantage lies.
